@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TimeSaver бот — Филиал ходими</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== Telegram ko'rinishi: umumiy uslub (o'zgartirmang, faqat nusxa oling) ===== */
+:root{
+  --page:#ECEAE3;--page-tx:#1E1D2B;--page-mute:#62679A;
+  --chat:#D5E0C9;--in:#FFFFFF;--in-tx:#0F1419;--out:#E1FFC8;--out-tx:#0F1419;--meta:#8A9AA9;--link:#2E7BC4;
+  --head:#FFFFFF;--head-tx:#0F1419;--head-sub:#7B8B99;
+  --ib:rgba(80,110,70,.38);--ib-tx:#FFFFFF;--ib-danger:#E5484D;--ib-success:#2E9E5B;--ib-primary:#1F2A6B;
+  --kb:#F1F2F4;--kb-btn:#FFFFFF;--kb-tx:#0F1419;--kb-line:#D9DCE1;
+  --q:#2E7BC4;--q-bg:rgba(46,123,196,.08);--code:#C7334A;--sep:#E3E6EA;
+  --frame:#11163A;
+}
+:root[data-theme="dark"]{
+  --page:#0B0E22;--page-tx:#EEF0FB;--page-mute:#8C93C2;
+  --chat:#0E1621;--in:#182533;--in-tx:#F5F7FA;--out:#2B5278;--out-tx:#F5F7FA;--meta:#6D8299;--link:#6AB2F2;
+  --head:#17212B;--head-tx:#F5F7FA;--head-sub:#6D8299;
+  --ib:rgba(46,62,82,.92);--ib-tx:#F5F7FA;--ib-danger:#C9353B;--ib-success:#23804A;--ib-primary:#3A4BB0;
+  --kb:#17212B;--kb-btn:#232E3C;--kb-tx:#F5F7FA;--kb-line:#0E1621;
+  --q:#6AB2F2;--q-bg:rgba(106,178,242,.10);--code:#F07A8C;--sep:#22303F;
+  --frame:#000000;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--page-tx);font-family:"Onest",-apple-system,"Segoe UI",Roboto,sans-serif}
+.top{max-width:1400px;margin:0 auto;padding:22px 16px 6px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top h1{font-size:22px;font-weight:700;margin:0;flex:1}
+.top p{margin:4px 0 0;color:var(--page-mute);font-size:14px;width:100%}
+.theme{height:34px;padding:0 14px;border-radius:9px;border:1px solid var(--sep);background:var(--head);color:var(--head-tx);font:inherit;font-size:13px;cursor:pointer}
+.screens{max-width:1400px;margin:0 auto;padding:12px 16px 40px;display:flex;flex-wrap:wrap;gap:26px;justify-content:center}
+.screen{width:360px;display:flex;flex-direction:column;gap:10px}
+.cap{font-size:14px;color:var(--page-tx);font-weight:600}
+.cap span{display:block;font-weight:400;color:var(--page-mute);font-size:13px;margin-top:2px}
+/* telefon */
+.phone{width:360px;height:740px;border-radius:38px;background:var(--frame);padding:10px;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.scr{width:100%;height:100%;border-radius:30px;overflow:hidden;display:flex;flex-direction:column;background:var(--chat);font-size:14.5px;line-height:1.38}
+.tg-head{background:var(--head);display:flex;align-items:center;gap:10px;padding:30px 12px 9px;border-bottom:1px solid var(--sep)}
+.tg-head .back{color:var(--link);font-size:20px;width:18px}
+.tg-head .ava{width:38px;height:38px;border-radius:50%;flex:none;display:block}
+.tg-head .nm{flex:1;min-width:0}.tg-head .nm b{display:block;font-size:15.5px;color:var(--head-tx);font-weight:600}
+.tg-head .nm span{font-size:12.5px;color:var(--head-sub)}
+.chat{flex:1;overflow:hidden;padding:10px 8px 8px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
+.day{align-self:center;background:rgba(0,0,0,.18);color:#fff;font-size:12px;padding:2px 10px;border-radius:12px;margin:2px 0 4px}
+.msg{max-width:92%;background:var(--in);color:var(--in-tx);border-radius:14px 14px 14px 4px;padding:7px 10px 6px;align-self:flex-start;position:relative}
+.msg.out{background:var(--out);color:var(--out-tx);border-radius:14px 14px 4px 14px;align-self:flex-end}
+.msg .t{float:right;font-size:11px;color:var(--meta);margin:6px 0 -2px 10px}
+.msg b{font-weight:600}.msg i{font-style:italic}
+.msg code{font-family:ui-monospace,Consolas,monospace;font-size:13px;color:var(--code)}
+.msg .q{border-left:3px solid var(--q);background:var(--q-bg);border-radius:4px;padding:4px 8px;margin:4px 0}
+.msg .muted{color:var(--meta)}
+.msg .row{display:flex;justify-content:space-between;gap:10px}
+.msg .num{font-variant-numeric:tabular-nums}
+.wrap{display:flex;flex-direction:column;gap:3px;align-self:flex-start;max-width:92%}
+.wrap .msg{max-width:100%}
+.ikb{display:flex;flex-direction:column;gap:3px}
+.ikb .r{display:flex;gap:3px}
+.ib{flex:1;min-width:0;background:var(--ib);color:var(--ib-tx);border-radius:9px;padding:8px 6px;text-align:center;font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib.danger{background:var(--ib-danger)}.ib.success{background:var(--ib-success)}.ib.primary{background:var(--ib-primary)}
+.doc{display:flex;gap:10px;align-items:center;margin:2px 0 4px}
+.doc .fi{width:44px;height:44px;border-radius:50%;background:#2E9E5B;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+.doc b{display:block;font-size:14px}.doc span{font-size:12.5px;color:var(--meta)}
+.rkb{background:var(--kb);padding:6px 6px 16px;display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--sep)}
+.rkb .r{display:flex;gap:5px}
+.kb{flex:1;min-width:0;background:var(--kb-btn);color:var(--kb-tx);border-radius:8px;padding:10px 4px;text-align:center;font-size:13.5px;font-weight:500;box-shadow:0 1px 0 var(--kb-line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kb.danger{background:var(--ib-danger);color:#fff}.kb.success{background:var(--ib-success);color:#fff}.kb.primary{background:var(--ib-primary);color:#fff}
+.input{background:var(--head);display:flex;align-items:center;gap:8px;padding:8px 12px 18px;border-top:1px solid var(--sep);color:var(--meta);font-size:14px}
+.input .pl{flex:1}
+.notes{max-width:1400px;margin:0 auto;padding:0 16px 40px;color:var(--page-mute);font-size:14px;line-height:1.6}
+.notes b{color:var(--page-tx)}
+/* ===== филиал.html: қўшимча қоидалар ===== */
+.chat.scrolled{justify-content:flex-start}
+.ikb .ib.w2{flex:2}
+.ikb .ib.w13{flex:1.3}
+/* ===== NAVIGATSIYA.md: ичма-ич навигация ===== */
+.crumb{font-size:12.5px;color:var(--meta);margin-bottom:4px;display:block}
+.ib.pressed{box-shadow:inset 0 0 0 2px #D4F06A}
+.menu-btn{background:var(--ib-primary);color:#fff;border-radius:8px;padding:5px 10px;font-size:13px;font-weight:600}
+.tree{max-width:1400px;margin:0 auto 6px;padding:0 16px}
+.tree pre{background:var(--head);color:var(--head-tx);border:1px solid var(--sep);border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.55;overflow:auto;margin:0}
+/* ===== кўчириш ABC ===== */
+.msg pre{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.45;color:var(--code);margin:4px 0 6px;white-space:pre;overflow:hidden}
+</style>
+<script>try{var t=localStorage.getItem("tsbot-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="top"><h1>TimeSaver бот · Филиал ходими</h1>
+  <button class="theme" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('tsbot-theme',r.dataset.theme)}catch(e){}">Кун / Тун</button>
+  <p>Филиал: ДОРИХОНА ЧИНОЗ · 17.11.2026 · ичма-ич навигация: битта панел хабари, тугма босилганда шу хабарнинг ўзи ўзгаради. Кетма-кет телефонлар — битта хабарнинг ҳолатлари.</p></div>
+<div class="tree"><pre>🏠 Бош меню
+├─ 🔴 ШОШИЛИНЧ · 6       → йўналиш → дори (A / B / C белгиси, A биринчи) → [✅ Бердим / ✏️ Бошқа сон / ❌ Бера олмайман]
+├─ 🟡 АССОРТИМЕНТ · 12   → йўналиш → дори → [✅ Бердим / ✏️ Бошқа сон / ❌ Бера олмайман]
+├─ 🟢 ОДДИЙ · 9          → йўналиш → дори → [✅ Бердим / ✏️ Бошқа сон / ❌ Бера олмайман]
+├─ 📥 Келадиган · 5      → беручи (УРГУТ / ЭРКИН / СКЛАД) → [📥 Ҳаммасини олдим / ⚠ Фарқ]
+├─ ⏰ Срок · 134         → A / B / C → 20 та рўйхат → [📥 Қолганини Excel'да]
+├─ 📦 30+ кун · 342      → A / B / C → 20 та рўйхат → [📥 Қолганини Excel'да]
+└─ 📋 Бугунги ҳолат      → A/B/C: бажарилди / қолди → [❌ Бажарилмаганлар / ✅ Бажарилганлар]
+
+💰 Кўчириш ABC: сумма = сон × харид нархи, бутун тармоқ бўйича · A — пулнинг 80% · B — 15% · C — 5%
+   Категория (🔴 / 🟡 / 🟢) ўзгармайди; ABC — қўшимча белги ва рўйхат ичидаги тартиб (A биринчи, кейин сумма)
+Ҳар даражанинг охирги қатори: [◀ Орқага] [🏠 Меню] · чуқурлик — 3 даражагача
+Алоҳида хабар фақат: /start · ёзилган матн (дори номи, сон) · 📄 Excel файл · 🔔 бот билдиришномаси</pre></div>
+<div class="screens">
+
+  <!-- 1. /start → Бош меню -->
+  <div class="screen">
+    <div class="cap">1. /start → 🏠 Бош меню<span>Бот битта панел хабари юборади. Шундан кейин ҳамма тугма шу хабарни ўзгартиради. Пастки клавиатура йўқ.</span></div>
+    <div class="phone"><div class="scr">
+      <div class="tg-head"><span class="back">‹</span>
+        <svg class="ava" viewBox="-85 -85 170 170"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+        <div class="nm"><b>TimeSaver</b><span>бот</span></div></div>
+      <div class="chat">
+        <div class="day">Бугун</div>
+        <div class="msg out">/start<span class="t">08:42</span></div>
+        <div class="wrap">
+          <div class="msg"><span class="crumb">🏠 Бош меню</span>
+            🏬 <b>ДОРИХОНА ЧИНОЗ</b> · филиал<br>
+            <span class="muted">Хуш келибсиз! Бугунги ҳолат:</span><br><br>
+            Бугун бериш керак: <b>27 та</b><br>
+            ⏳ ШОШИЛИНЧ — <b>10:00</b> гача · <b>1 соат 18 дақ</b><br>
+            📥 Сизга келади — <b>5 та</b><br>
+            💰 A: <b>6 та</b> қолди · <b>3,3 млн сўм</b>
+            <div class="q">⏰ Срок · A: <b>26 та</b> · <b>42,6 млн сўм</b><br>📦 30+ кун · A: <b>38 та</b> · <b>61,2 млн сўм</b></div>
+            🕒 Маълумот: бугун 08:42<span class="t">08:42</span></div>
+          <div class="ikb">
+            <div class="r"><div class="ib danger">🔴 ШОШИЛИНЧ · 6</div></div>
+            <div class="r"><div class="ib w13">🟡 АССОРТИМЕНТ · 12</div><div class="ib success">🟢 ОДДИЙ · 9</div></div>
+            <div class="r"><div class="ib">📥 Келадиган · 5</div><div class="ib">📋 Бугунги ҳолат</div></div>
+            <div class="r"><div class="ib pressed">⏰ Срок · 134</div><div class="ib">📦 30+ кун · 342</div></div>
+            <div class="r"><div class="ib">🔄 Янгилаш</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="input"><span class="menu-btn">☰ Меню</span><span class="pl">Хабар</span></div>
+    </div></div>
+  </div>
+
+  <!-- 2. Срок: A / B / C -->
+  <div class="screen">
+    <div class="cap">2. «⏰ Срок · 134» босилди → шу хабар ўзгарди<span>Чатда янги хабар йўқ: юқорида ўша /start, панел энди A / B / C ни кўрсатади. A — асосий амал.</span></div>
+    <div class="phone"><div class="scr">
+      <div class="tg-head"><span class="back">‹</span>
+        <svg class="ava" viewBox="-85 -85 170 170"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+        <div class="nm"><b>TimeSaver</b><span>бот</span></div></div>
+      <div class="chat">
+        <div class="day">Бугун</div>
+        <div class="msg out">/start<span class="t">08:42</span></div>
+        <div class="wrap">
+          <div class="msg"><span class="crumb">🏠 › ⏰ Срок</span>
+            ⏰ <b>Срок</b> · 🏬 ДОРИХОНА ЧИНОЗ<br>
+            <span class="muted">Муддати яқинлашган дорилар</span><br><br>
+            Жами: <b>134 та</b> · <b>53,3 млн сўм</b><br><br>
+            <b>A</b> · <b>26 та</b> · <b>42,6 млн</b> · <b>80%</b><br>
+            <span class="muted">энг қиммат — биринчи навбатда</span><br>
+            <b>B</b> · <b>31 та</b> · <b>8,0 млн</b> · <b>15%</b><br>
+            <span class="muted">ўртача нархдагилар</span><br>
+            <b>C</b> · <b>77 та</b> · <b>2,7 млн</b> · <b>5%</b><br>
+            <span class="muted">кўп, лекин арзон</span>
+            <div class="q">A дан бошланг: 26 та дори пулнинг 80% ини ушлаб турибди.</div>
+            <span class="muted">Пул = қолдиқ × нарх</span><br>
+            🕒 Маълумот: бугун 08:42<span class="t">08:44</span></div>
+          <div class="ikb">
+            <div class="r"><div class="ib primary pressed">A · 26 та</div><div class="ib">B · 31 та</div><div class="ib">C · 77 та</div></div>
+            <div class="r"><div class="ib">📥 Ҳаммаси Excel'да</div></div>
+            <div class="r"><div class="ib">◀ Орқага</div><div class="ib">🏠 Меню</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="input"><span class="menu-btn">☰ Меню</span><span class="pl">Хабар</span></div>
+    </div></div>
+  </div>
+
+  <!-- 3. Срок · A: 20 та рўйхат -->
+  <div class="screen">
+    <div class="cap">3. «A · 26 та» босилди → шу хабар ўзгарди<span>Пул бўйича камайиш тартибида 20 таси. Хабар узун — боши юқорида кесилган (бу нормал), пастда якун ва Excel тугмаси.</span></div>
+    <div class="phone"><div class="scr">
+      <div class="tg-head"><span class="back">‹</span>
+        <svg class="ava" viewBox="-85 -85 170 170"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+        <div class="nm"><b>TimeSaver</b><span>бот</span></div></div>
+      <div class="chat">
+        <div class="wrap">
+          <div class="msg"><span class="crumb">🏠 › ⏰ Срок › A</span>
+            ⏰ <b>Срок · A</b> · 🏬 ДОРИХОНА ЧИНОЗ<br>
+            <span class="muted">Пул бўйича · 26 тадан 20 таси</span><br><br>
+            1. <b>Аугментин 625мг №14</b><br><span class="muted">46 та · 12.01.2027 (56 кун)</span> · <b>8 740 000</b><br>
+            2. <b>Эссенциале форте №30</b> 🔴<br><span class="muted">38 та · 10.12.2026 (23 кун)</span> · <b>4 864 000</b><br>
+            3. <b>Ксарелто 20мг №28</b><br><span class="muted">6 та · 08.02.2027 (83 кун)</span> · <b>4 272 000</b><br>
+            4. <b>Детралекс 1000мг №30</b><br><span class="muted">14 та · 20.12.2026 (33 кун)</span> · <b>3 304 000</b><br>
+            5. <b>Флемоксин солютаб 500мг №20</b><br><span class="muted">41 та · 25.01.2027 (69 кун)</span> · <b>2 952 000</b><br>
+            6. <b>Арбидол 100мг №20</b> 🔴<br><span class="muted">33 та · 03.12.2026 (16 кун)</span> · <b>2 574 000</b><br>
+            7. <b>Нурофен 200мг №24</b><br><span class="muted">52 та · 15.03.2027 (118 кун)</span> · <b>2 132 000</b><br>
+            8. <b>Мезим форте №20</b><br><span class="muted">64 та · 05.01.2027 (49 кун)</span> · <b>1 696 000</b><br>
+            9. <b>Линекс №16</b> 🔴<br><span class="muted">23 та · 25.11.2026 (8 кун)</span> · <b>1 334 000</b><br>
+            10. <b>Терафлю №10</b><br><span class="muted">19 та · 28.12.2026 (41 кун)</span> · <b>1 216 000</b><br>
+            11. <b>Но-шпа 40мг №24</b><br><span class="muted">31 та · 01.04.2027 (135 кун)</span> · <b>1 054 000</b><br>
+            12. <b>Конкор 5мг №30</b><br><span class="muted">17 та · 20.02.2027 (95 кун)</span> · <b>884 000</b><br>
+            13. <b>Кардиомагнил 75мг №100</b> 🔴<br><span class="muted">12 та · 14.12.2026 (27 кун)</span> · <b>816 000</b><br>
+            14. <b>Мексидол 125мг №30</b><br><span class="muted">9 та · 28.04.2027 (162 кун)</span> · <b>756 000</b><br>
+            15. <b>Цитрамон П №10</b><br><span class="muted">210 та · 12.01.2027 (56 кун)</span> · <b>714 000</b><br>
+            16. <b>Нексиум 40мг №14</b><br><span class="muted">4 та · 10.05.2027 (174 кун)</span> · <b>672 000</b><br>
+            17. <b>Смекта №10</b> 🔴<br><span class="muted">22 та · 03.12.2026 (16 кун)</span> · <b>616 000</b><br>
+            18. <b>Энтерожермина №10</b><br><span class="muted">8 та · 08.02.2027 (83 кун)</span> · <b>568 000</b><br>
+            19. <b>Супрастин 25мг №20</b><br><span class="muted">26 та · 25.01.2027 (69 кун)</span> · <b>533 000</b><br>
+            20. <b>Актовегин 200мг №50</b><br><span class="muted">1 та · 15.03.2027 (118 кун)</span> · <b>498 000</b><br><br>
+            <b>20 / 26</b> кўрсатилди · <b>40,2 млн сўм</b><br>
+            <span class="muted">Қолган 6 таси (2,4 млн сўм) — Excel'да</span><br>
+            🔴 — муддатига 30 кундан кам қолган<br>
+            🕒 Маълумот: бугун 08:42<span class="t">08:44</span></div>
+          <div class="ikb">
+            <div class="r"><div class="ib success pressed">📥 Қолган 6 тасини Excel'да олиш</div></div>
+            <div class="r"><div class="ib">◀ Орқага</div><div class="ib">🏠 Меню</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="input"><span class="menu-btn">☰ Меню</span><span class="pl">Хабар</span></div>
+    </div></div>
+  </div>
+
+  <!-- 4. Excel: ҳужжат + панел пастга тушди -->
+  <div class="screen">
+    <div class="cap">4. «📥 Қолган 6 тасини…» босилди → файл ва панел пастда<span>Файл — алоҳида хабар (ҳужжат). Эски панел ўчирилди, шу панел файл остида янгидан чиқди: чатда доим битта панел.</span></div>
+    <div class="phone"><div class="scr">
+      <div class="tg-head"><span class="back">‹</span>
+        <svg class="ava" viewBox="-85 -85 170 170"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+        <div class="nm"><b>TimeSaver</b><span>бот</span></div></div>
+      <div class="chat">
+        <div class="day">Бугун</div>
+        <div class="msg out">/start<span class="t">08:42</span></div>
+        <div class="wrap">
+          <div class="msg">
+            <div class="doc"><div class="fi">XLS</div><div><b>Срок_A_ЧИНОЗ_17.11.xlsx</b><span>14 КБ · Excel</span></div></div>
+            ⏰ <b>Срок · A</b> · ДОРИХОНА ЧИНОЗ<br>
+            Файлда: <b>26 та</b> · <b>42,6 млн сўм</b><br>
+            <span class="muted">21–26 таси — фақат шу файлда</span><span class="t">08:45</span></div>
+          <div class="ikb">
+            <div class="r"><div class="ib">🏠 Менюга қайтиш</div></div>
+          </div>
+        </div>
+        <div class="wrap">
+          <div class="msg"><span class="crumb">🏠 › ⏰ Срок › A</span>
+            📥 <b>Файл юборилди</b> · Срок · A<br>
+            <span class="muted">Юқоридаги Excel'да ҳамма 26 таси, пул бўйича</span><br><br>
+            Хабарда: <b>1–20</b> · <b>40,2 млн сўм</b><br>
+            Фақат файлда: <b>21–26</b> · <b>2,4 млн сўм</b><br>
+            🕒 Маълумот: бугун 08:42<span class="t">08:45</span></div>
+          <div class="ikb">
+            <div class="r"><div class="ib">📋 Рўйхатни қайта кўрсат</div></div>
+            <div class="r"><div class="ib">B · 31 та</div><div class="ib">C · 77 та</div></div>
+            <div class="r"><div class="ib">◀ Орқага</div><div class="ib">🏠 Меню</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="input"><span class="menu-btn">☰ Меню</span><span class="pl">Хабар</span></div>
+    </div></div>
+  </div>
+
+  <!-- 5. ШОШИЛИНЧ: йўналишлар -->
+  <div class="screen">
+    <div class="cap">5. Бош менюда «🔴 ШОШИЛИНЧ · 6» босилди → шу хабар ўзгарди<span>Панел йўналишлар бўйича гуруҳлайди. Ҳар йўналиш — битта тугма, ичкарида дорилар.</span></div>
+    <div class="phone"><div class="scr">
+      <div class="tg-head"><span class="back">‹</span>
+        <svg class="ava" viewBox="-85 -85 170 170"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+        <div class="nm"><b>TimeSaver</b><span>бот</span></div></div>
+      <div class="chat">
+        <div class="day">Бугун</div>
+        <div class="msg out">/start<span class="t">08:42</span></div>
+        <div class="wrap">
+          <div class="msg"><span class="crumb">🏠 › 🔴 ШОШИЛИНЧ</span>
+            🔴 <b>ШОШИЛИНЧ</b> · 🏬 ДОРИХОНА ЧИНОЗ<br>
+            <span class="muted">Бошқа филиалда тугаган, сотуви бор</span><br>
+            Жами: <b>6</b> хил дори · <b>24 та</b> · <b>2,1 млн сўм</b><br>
+            ⏳ <b>10:00</b> гача · <b>1 соат 12 дақ</b> қолди<br><br>
+            <b>→ ДОРИХОНА УРГУТ</b> · <b>1 180 000</b><br>
+            <code>A</code> Аугментин <span class="muted">· 4 та ·</span> <b>760 000</b><br>
+            <code>B</code> Нурофен <span class="muted">· 6 та ·</span> <b>246 000</b><br>
+            <code>C</code> Линекс <span class="muted">· 3 та ·</span> <b>174 000</b><br>
+            <b>→ ДОРИХОНА ЭРКИН</b> · <b>934 000</b><br>
+            <code>A</code> Эссенциале <span class="muted">· 4 та ·</span> <b>512 000</b><br>
+            <code>A</code> Флемоксин <span class="muted">· 5 та ·</span> <b>340 000</b><br>
+            <code>C</code> Арбидол <span class="muted">· 2 та ·</span> <b>82 000</b><br>
+            <br>
+            <span class="muted">Йўналишни танланг 👇</span><br>
+            🕒 Маълумот: бугун 08:42<span class="t">08:48</span></div>
+          <div class="ikb">
+            <div class="r"><div class="ib danger pressed">→ ДОРИХОНА УРГУТ · 3 хил</div></div>
+            <div class="r"><div class="ib danger">→ ДОРИХОНА ЭРКИН · 3 хил</div></div>
+            <div class="r"><div class="ib">📥 Ҳаммаси Excel'да</div></div>
+            <div class="r"><div class="ib">◀ Орқага</div><div class="ib">🏠 Меню</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="input"><span class="menu-btn">☰ Меню</span><span class="pl">Хабар</span></div>
+    </div></div>
+  </div>
+
+  <!-- 6. ШОШИЛИНЧ › УРГУТ: дорилар -->
+  <div class="screen">
+    <div class="cap">6. «→ ДОРИХОНА УРГУТ» босилди → шу хабар ўзгарди<span>Йўналишдаги дорилар. Биттасини очиш ёки ҳаммасини бир тугма билан «Бердим».</span></div>
+    <div class="phone"><div class="scr">
+      <div class="tg-head"><span class="back">‹</span>
+        <svg class="ava" viewBox="-85 -85 170 170"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+        <div class="nm"><b>TimeSaver</b><span>бот</span></div></div>
+      <div class="chat">
+        <div class="day">Бугун</div>
+        <div class="msg out">/start<span class="t">08:42</span></div>
+        <div class="wrap">
+          <div class="msg"><span class="crumb">🏠 › 🔴 ШОШИЛИНЧ › УРГУТ</span>
+            🔴 <b>ШОШИЛИНЧ</b> → ДОРИХОНА УРГУТ<br>
+            <span class="muted">Дорини танланг ёки ҳаммасини белгиланг</span><br><br>
+            1. <code>A</code> <b>Аугментин 625мг №14</b><br><span class="muted">4 та · 12.01.2027 (56 кун)</span> · <b>760 000</b><br>
+            2. <code>B</code> <b>Нурофен 200мг №24</b><br><span class="muted">6 та · 15.03.2027 (118 кун)</span> · <b>246 000</b><br>
+            3. <code>C</code> <b>Линекс №16</b><br><span class="muted">3 та · 08.02.2027 (83 кун)</span> · <b>174 000</b><br>
+            <span class="muted">Тартиб: A биринчи, кейин сумма бўйича</span><br><br>
+            Жами: <b>13 та</b> · <b>1 180 000 сўм</b><br>
+            ⏳ <b>10:00</b> гача · <b>1 соат 10 дақ</b> қолди<span class="t">08:50</span></div>
+          <div class="ikb">
+            <div class="r"><div class="ib pressed">1 · Аугментин</div><div class="ib">2 · Нурофен</div><div class="ib">3 · Линекс</div></div>
+            <div class="r"><div class="ib success">✅ Ҳаммасини бердим · 13 та</div></div>
+            <div class="r"><div class="ib">◀ Орқага</div><div class="ib">🏠 Меню</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="input"><span class="menu-btn">☰ Меню</span><span class="pl">Хабар</span></div>
+    </div></div>
+  </div>
+
+  <!-- 7. Топшириқ карточкаси -->
+  <div class="screen">
+    <div class="cap">7. «1 · Аугментин» босилди → шу хабар карточкага айланди<span>Энг чуқур даража: бериш, бошқа сон (сон матн билан ёзилади) ёки рад. «Бердим» дан кейин панел 6-ҳолатга қайтади.</span></div>
+    <div class="phone"><div class="scr">
+      <div class="tg-head"><span class="back">‹</span>
+        <svg class="ava" viewBox="-85 -85 170 170"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+        <div class="nm"><b>TimeSaver</b><span>бот</span></div></div>
+      <div class="chat">
+        <div class="day">Бугун</div>
+        <div class="msg out">/start<span class="t">08:42</span></div>
+        <div class="wrap">
+          <div class="msg"><span class="crumb">🏠 › 🔴 › УРГУТ › Аугментин</span>
+            🔴 <b>ШОШИЛИНЧ</b> · 1 / 3<br>
+            <span class="muted">Бугун 10:00 гача бериш керак</span><br><br>
+            💊 <b>Аугментин 625мг №14</b><br>
+            ДОРИХОНА ЧИНОЗ → <b>ДОРИХОНА УРГУТ</b><br>
+            Сони: <b>4 та</b> · <b>760 000 сўм</b> · <code>A</code><br>
+            Муддати: 12.01.2027 (56 кун)<br>
+            <span class="muted">Сабаб: УРГУТда тугаган, сотуви бор</span><br>
+            ⏳ <b>10:00</b> гача · <b>1 соат 5 дақ</b> қолди<span class="t">08:55</span></div>
+          <div class="ikb">
+            <div class="r"><div class="ib success">✅ Бердим · 4 та</div><div class="ib">✏️ Бошқа сон</div></div>
+            <div class="r"><div class="ib danger">❌ Бера олмайман</div><div class="ib">Кейинги ▶</div></div>
+            <div class="r"><div class="ib">◀ Орқага</div><div class="ib">🏠 Меню</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="input"><span class="menu-btn">☰ Меню</span><span class="pl">Хабар</span></div>
+    </div></div>
+  </div>
+
+  <!-- 8. Бугунги ҳолат: A / B / C -->
+  <div class="screen">
+    <div class="cap">8. Бош менюда «📋 Бугунги ҳолат» босилди → шу хабар ўзгарди<span>Бугунги кўчириш натижаси A / B / C бўйича: бажарилди ва қолди алоҳида. Пастда — қолган A лар (энг қиммат).</span></div>
+    <div class="phone"><div class="scr">
+      <div class="tg-head"><span class="back">‹</span>
+        <svg class="ava" viewBox="-85 -85 170 170"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+        <div class="nm"><b>TimeSaver</b><span>бот</span></div></div>
+      <div class="chat">
+        <div class="day">Бугун</div>
+        <div class="msg out">/start<span class="t">08:42</span></div>
+        <div class="wrap">
+          <div class="msg"><span class="crumb">🏠 › 📋 Бугунги ҳолат</span>
+            📋 <b>Бугунги ҳолат</b> · 🏬 ДОРИХОНА ЧИНОЗ<br>
+            <span class="muted">Кўчириш натижаси · A / B / C</span><br><br>
+            Жами: <b>27 та</b> · бажарилди <b>19</b> · қолди <b>8</b>
+<pre>          Бажарилди  Қолди
+A  (80%)       4 та   2 та
+B  (15%)       6 та   2 та
+C   (5%)       9 та   4 та
+Жами          19 та   8 та</pre>
+            ❌ <b>Бажарилмаганлар (A):</b><br>
+            1. <b>Ксарелто 20мг №28</b> 🟢<br><span class="muted">→ ДОРИХОНА ЭРКИН · 1 та</span> · <b>712 000</b><br>
+            2. <b>Детралекс 1000мг №30</b> 🟡<br><span class="muted">→ ДОРИХОНА УРГУТ · 3 та</span> · <b>708 000</b><br>
+            Қолган A: <b>1,4 млн сўм</b><br>
+            🕒 Маълумот: бугун 16:10<span class="t">16:10</span></div>
+          <div class="ikb">
+            <div class="r"><div class="ib danger">❌ Бажарилмаганлар · 8 та</div></div>
+            <div class="r"><div class="ib success">✅ Бажарилганлар · 19 та</div></div>
+            <div class="r"><div class="ib">◀ Орқага</div><div class="ib">🏠 Меню</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="input"><span class="menu-btn">☰ Меню</span><span class="pl">Хабар</span></div>
+    </div></div>
+  </div>
+
+  <!-- 9. Билдиришнома -->
+  <div class="screen">
+    <div class="cap">9. Бот билдиришномаси → «Очиш» → панел пастда<span>Эрталабки топшириқ — алоҳида хабар. «Очиш» босилганда эски панел ўчади, Бош меню шу хабар остида янгидан чиқади.</span></div>
+    <div class="phone"><div class="scr">
+      <div class="tg-head"><span class="back">‹</span>
+        <svg class="ava" viewBox="-85 -85 170 170"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+        <div class="nm"><b>TimeSaver</b><span>бот</span></div></div>
+      <div class="chat">
+        <div class="day">Бугун</div>
+        <div class="wrap">
+          <div class="msg">📋 <b>Бугунги кўчириш топшириғи тайёр</b><br>
+            <span class="muted">🏬 ДОРИХОНА ЧИНОЗ · бериш керак: <b>27 та</b></span><br>
+            🔴 ШОШИЛИНЧ — <b>6 та</b> · <b>10:00</b> гача<span class="t">07:30</span></div>
+          <div class="ikb">
+            <div class="r"><div class="ib primary pressed">Очиш</div></div>
+          </div>
+        </div>
+        <div class="wrap">
+          <div class="msg"><span class="crumb">🏠 Бош меню</span>
+            🏬 <b>ДОРИХОНА ЧИНОЗ</b> · филиал<br>
+            Бугун бериш керак: <b>27 та</b><br>
+            ⏳ ШОШИЛИНЧ — <b>10:00</b> гача · <b>2 соат 22 дақ</b><br>
+            📥 Сизга келади — <b>5 та</b><br>
+            💰 A: <b>6 та</b> қолди · <b>3,3 млн сўм</b><br>
+            🕒 Маълумот: бугун 07:30<span class="t">07:38</span></div>
+          <div class="ikb">
+            <div class="r"><div class="ib danger">🔴 ШОШИЛИНЧ · 6</div></div>
+            <div class="r"><div class="ib w13">🟡 АССОРТИМЕНТ · 12</div><div class="ib success">🟢 ОДДИЙ · 9</div></div>
+            <div class="r"><div class="ib">📥 Келадиган · 5</div><div class="ib">📋 Бугунги ҳолат</div></div>
+            <div class="r"><div class="ib">⏰ Срок · 134</div><div class="ib">📦 30+ кун · 342</div></div>
+            <div class="r"><div class="ib">🔄 Янгилаш</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="input"><span class="menu-btn">☰ Меню</span><span class="pl">Хабар</span></div>
+    </div></div>
+  </div>
+
+</div>
+<div class="notes"><b>Тамойиллар:</b><br>
+1. Пастки клавиатура йўқ. /start — битта панел хабари; тугма босилганда чатга «⏰ Срок · 134» каби хабар тушмайди, шу хабарнинг матни ва тугмалари жойида ўзгаради (editMessageText). Пастда фақат матн майдони ва «☰ Меню» (/start).<br>
+2. Ичма-ич дарахт, 3 даражагача: ҳар ҳолат бошида йўл қатори (🏠 › ⏰ Срок › A), охирги қатор — «◀ Орқага» · «🏠 Меню». Бош менюда ШОШИЛИНЧ — қизил, бутун қатор; Срок ва 30+ кун — пастда, рангсиз.<br>
+3. Алоҳида хабар фақат: /start, ёзилган матн (дори номи, «Бошқа сон»), Excel файл ва бот билдиришномаси. Улардан кейин эски панел ўчади ва янгиси пастга тушади — чатда доим битта панел.<br>
+4. Срок / 30+ кун: A / B / C → пул бўйича 20 таси панелда, қолгани битта яшил тугма билан Excel'да. ШОШИЛИНЧ: йўналиш → дорилар (ёки «✅ Ҳаммасини бердим») → карточка.<br>
+5. Кўчиришда ҳам A / B / C (Срок каби): кунлик топшириқлар суммаси (сон × харид нархи) бутун тармоқ бўйича — A пулнинг 80%, B 15%, C 5%. Категория (🔴 / 🟡 / 🟢) ўзгармайди; ABC — қўшимча белги ва рўйхат ичидаги тартиб (A биринчи, кейин сумма). Бош менюда — қолган A лар, «📋 Бугунги ҳолат» да — A / B / C: бажарилди / қолди.</div>
+</body>
+</html>

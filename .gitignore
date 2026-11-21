@@ -1,0 +1,24 @@
+# Muhit va yig'ish natijalari
+.build-venv/
+build/
+release/*.exe
+__pycache__/
+*.pyc
+
+# Zaxira nusxalar
+_zaxira*/
+
+# Mijoz ma'lumotlari va maxfiy sozlamalar (hech qachon yuklanmasin)
+config.ini
+db.ini
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.log.*
+panel_port.txt
+refresh_status.txt
+*.xlsm
+*.xlsx
+backups/
+

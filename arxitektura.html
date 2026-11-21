@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TimeSaver arxitekturasi</title>
+<style>
+:root{
+  --bg:#FAF9F6;--card:#FFFFFF;--line:#E5E1D7;--tx:#1E1D2B;--mute:#6B6878;
+  --g-f:#F1EFE8;--g-s:#B4B2A9;--g-t:#444441;--g-st:#5F5E5A;
+  --p-f:#EEEDFE;--p-s:#7F77DD;--p-t:#3C3489;--p-st:#534AB7;
+  --t-f:#E1F5EE;--t-s:#1D9E75;--t-t:#085041;--t-st:#0F6E56;
+  --c-f:#FAECE7;--c-s:#D85A30;--c-t:#712B13;--c-st:#993C1D;
+  --n-f:#FFFFFF;--n-s:#B4B2A9;--n-t:#2C2C2A;--n-st:#5F5E5A;
+  --arr:#888780;--ok:#3B6D11;--ok-d:#EAF3DE;--wip:#854F0B;--wip-d:#FAEEDA;--todo:#5F5E5A;--todo-d:#F1EFE8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1C1B19;--card:#262522;--line:#3A3936;--tx:#ECEBE6;--mute:#A3A19A;
+    --g-f:#2C2C2A;--g-s:#5F5E5A;--g-t:#F1EFE8;--g-st:#D3D1C7;
+    --p-f:#26215C;--p-s:#AFA9EC;--p-t:#EEEDFE;--p-st:#CECBF6;
+    --t-f:#04342C;--t-s:#5DCAA5;--t-t:#E1F5EE;--t-st:#9FE1CB;
+    --c-f:#4A1B0C;--c-s:#F0997B;--c-t:#FAECE7;--c-st:#F5C4B3;
+    --n-f:#262522;--n-s:#5F5E5A;--n-t:#F1EFE8;--n-st:#B4B2A9;
+    --arr:#9C9A92;--ok:#C0DD97;--ok-d:#173404;--wip:#FAC775;--wip-d:#412402;--todo:#D3D1C7;--todo-d:#2C2C2A;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Segoe UI",system-ui,sans-serif;font-size:15px;line-height:1.6}
+main{max-width:860px;margin:0 auto;padding:28px 16px 48px}
+h1{font-size:24px;font-weight:600;margin:0 0 4px}
+h2{font-size:18px;font-weight:600;margin:32px 0 10px}
+p.lead{color:var(--mute);margin:0 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:"Segoe UI",system-ui,sans-serif}
+.th{font-size:14px;font-weight:600}.ts{font-size:12px}
+.g rect{fill:var(--g-f);stroke:var(--g-s)}.g .th{fill:var(--g-t)}.g .ts{fill:var(--g-st)}
+.p rect{fill:var(--p-f);stroke:var(--p-s)}.p .th{fill:var(--p-t)}.p .ts{fill:var(--p-st)}
+.t rect{fill:var(--t-f);stroke:var(--t-s)}.t .th{fill:var(--t-t)}.t .ts{fill:var(--t-st)}
+.c rect{fill:var(--c-f);stroke:var(--c-s)}.c .th{fill:var(--c-t)}.c .ts{fill:var(--c-st)}
+.n rect{fill:var(--n-f);stroke:var(--n-s)}.n .th{fill:var(--n-t)}.n .ts{fill:var(--n-st)}
+.arr{stroke:var(--arr);stroke-width:1.5;fill:none}
+.legend{fill:var(--mute)}
+table{width:100%;border-collapse:collapse}
+td,th{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--mute);font-weight:600}
+td.n{width:34px;font-weight:600}
+.st{display:inline-block;font-size:12px;padding:2px 10px;border-radius:999px;white-space:nowrap;font-weight:600}
+.st.todo{background:var(--todo-d);color:var(--todo)}.st.wip{background:var(--wip-d);color:var(--wip)}.st.ok{background:var(--ok-d);color:var(--ok)}
+.where{color:var(--mute);font-size:13px}
+.upd{color:var(--mute);font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+<main>
+<h1>TimeSaver arxitekturasi</h1>
+<p class="lead">Hozirgi tuzilish, o'zgaradigan qismlar va ish holati. Ish davomida shu sahifa yangilanib boriladi.</p>
+
+<h2>1. Hozirgi tuzilish</h2>
+<div class="card">
+<svg viewBox="0 0 680 440" role="img" aria-label="TimeSaver hozirgi arxitekturasi">
+<defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<g class="n"><rect x="255" y="30" width="170" height="44" rx="8" stroke-width="0.8"/><text class="th" x="340" y="46" text-anchor="middle" dominant-baseline="central">Telegram</text><text class="ts" x="340" y="62" text-anchor="middle" dominant-baseline="central">Bot API</text></g>
+<g class="n"><rect x="450" y="30" width="170" height="44" rx="8" stroke-width="0.8"/><text class="th" x="535" y="46" text-anchor="middle" dominant-baseline="central">Brauzer</text><text class="ts" x="535" y="62" text-anchor="middle" dominant-baseline="central">Hozir: oddiy brauzer</text></g>
+<g class="g"><rect x="40" y="104" width="600" height="206" rx="20" stroke-width="0.8"/><text class="th" x="60" y="126" dominant-baseline="central">TimeSaver.exe · Windows kompyuter</text></g>
+<g class="p"><rect x="60" y="148" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="145" y="166" text-anchor="middle" dominant-baseline="central">Tray ikonka</text><text class="ts" x="145" y="186" text-anchor="middle" dominant-baseline="central">Menyu, holat rangi</text></g>
+<g class="p"><rect x="255" y="148" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="340" y="166" text-anchor="middle" dominant-baseline="central">Bot yadrosi</text><text class="ts" x="340" y="186" text-anchor="middle" dominant-baseline="central">Polling va jadval</text></g>
+<g class="p"><rect x="450" y="148" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="535" y="166" text-anchor="middle" dominant-baseline="central">Server paneli</text><text class="ts" x="535" y="186" text-anchor="middle" dominant-baseline="central">HTTP, port 8765</text></g>
+<g class="p"><rect x="60" y="232" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="145" y="250" text-anchor="middle" dominant-baseline="central">Excel o'qish</text><text class="ts" x="145" y="270" text-anchor="middle" dominant-baseline="central">Data · openpyxl</text></g>
+<g class="t"><rect x="255" y="232" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="340" y="250" text-anchor="middle" dominant-baseline="central">bot.db</text><text class="ts" x="340" y="270" text-anchor="middle" dominant-baseline="central">SQLite baza</text></g>
+<g class="p"><rect x="450" y="232" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="535" y="250" text-anchor="middle" dominant-baseline="central">FOM yozish</text><text class="ts" x="535" y="270" text-anchor="middle" dominant-baseline="central">fom_sql · pyodbc</text></g>
+<g class="t"><rect x="60" y="350" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="145" y="368" text-anchor="middle" dominant-baseline="central">baza_yangi.xlsm</text><text class="ts" x="145" y="388" text-anchor="middle" dominant-baseline="central">Makros SQL dan oladi</text></g>
+<g class="t"><rect x="450" y="350" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="535" y="368" text-anchor="middle" dominant-baseline="central">SQL Server</text><text class="ts" x="535" y="388" text-anchor="middle" dominant-baseline="central">Savdo bazasi, FOM</text></g>
+<line x1="340" y1="74" x2="340" y2="146" class="arr" marker-end="url(#a1)"/>
+<line x1="535" y1="74" x2="535" y2="146" class="arr" marker-end="url(#a1)"/>
+<line x1="230" y1="176" x2="253" y2="176" class="arr" marker-end="url(#a1)"/>
+<line x1="450" y1="176" x2="427" y2="176" class="arr" marker-end="url(#a1)"/>
+<line x1="340" y1="204" x2="340" y2="230" class="arr" marker-end="url(#a1)"/>
+<line x1="145" y1="288" x2="145" y2="348" class="arr" marker-end="url(#a1)"/>
+<line x1="535" y1="288" x2="535" y2="348" class="arr" marker-end="url(#a1)"/>
+<line x1="450" y1="378" x2="232" y2="378" class="arr" marker-end="url(#a1)"/>
+</svg>
+</div>
+
+<h2>2. O'zgaradigan qismlar</h2>
+<div class="card">
+<svg viewBox="0 0 680 470" role="img" aria-label="TimeSaver o'zgaradigan qismlar">
+<defs><marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<g class="n"><rect x="255" y="30" width="170" height="44" rx="8" stroke-width="0.8"/><text class="th" x="340" y="46" text-anchor="middle" dominant-baseline="central">Telegram</text><text class="ts" x="340" y="62" text-anchor="middle" dominant-baseline="central">Bot API</text></g>
+<g class="c"><rect x="450" y="30" width="170" height="44" rx="8" stroke-width="0.8"/><text class="th" x="535" y="46" text-anchor="middle" dominant-baseline="central">TimeSaver oynasi</text><text class="ts" x="535" y="62" text-anchor="middle" dominant-baseline="central">1 · WebView2, logo</text></g>
+<g class="g"><rect x="40" y="104" width="600" height="206" rx="20" stroke-width="0.8"/><text class="th" x="60" y="126" dominant-baseline="central">TimeSaver.exe · Windows kompyuter</text></g>
+<g class="c"><rect x="60" y="148" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="145" y="166" text-anchor="middle" dominant-baseline="central">Tray ikonka</text><text class="ts" x="145" y="186" text-anchor="middle" dominant-baseline="central">1, 3 · oyna, kirill</text></g>
+<g class="c"><rect x="255" y="148" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="340" y="166" text-anchor="middle" dominant-baseline="central">Bot yadrosi</text><text class="ts" x="340" y="186" text-anchor="middle" dominant-baseline="central">5–10 · menyu, ABC</text></g>
+<g class="c"><rect x="450" y="148" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="535" y="166" text-anchor="middle" dominant-baseline="central">Server paneli</text><text class="ts" x="535" y="186" text-anchor="middle" dominant-baseline="central">2, 3, 4, 8, 10</text></g>
+<g class="c"><rect x="60" y="232" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="145" y="250" text-anchor="middle" dominant-baseline="central">Excel o'qish</text><text class="ts" x="145" y="270" text-anchor="middle" dominant-baseline="central">9 · qoldiq solishtirish</text></g>
+<g class="c"><rect x="255" y="232" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="340" y="250" text-anchor="middle" dominant-baseline="central">bot.db</text><text class="ts" x="340" y="270" text-anchor="middle" dominant-baseline="central">9, 10 · yangi jadvallar</text></g>
+<g class="n"><rect x="450" y="232" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="535" y="250" text-anchor="middle" dominant-baseline="central">FOM yozish</text><text class="ts" x="535" y="270" text-anchor="middle" dominant-baseline="central">Faqat matnlar (3)</text></g>
+<g class="n"><rect x="60" y="350" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="145" y="368" text-anchor="middle" dominant-baseline="central">baza_yangi.xlsm</text><text class="ts" x="145" y="388" text-anchor="middle" dominant-baseline="central">O'zgarmaydi</text></g>
+<g class="c"><rect x="255" y="350" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="340" y="368" text-anchor="middle" dominant-baseline="central">Setup.exe</text><text class="ts" x="340" y="388" text-anchor="middle" dominant-baseline="central">1, 3 · kirill, oyna</text></g>
+<g class="n"><rect x="450" y="350" width="170" height="56" rx="8" stroke-width="0.8"/><text class="th" x="535" y="368" text-anchor="middle" dominant-baseline="central">SQL Server</text><text class="ts" x="535" y="388" text-anchor="middle" dominant-baseline="central">O'zgarmaydi</text></g>
+<line x1="340" y1="74" x2="340" y2="146" class="arr" marker-end="url(#a2)"/>
+<line x1="535" y1="74" x2="535" y2="146" class="arr" marker-end="url(#a2)"/>
+<line x1="230" y1="176" x2="253" y2="176" class="arr" marker-end="url(#a2)"/>
+<line x1="450" y1="176" x2="427" y2="176" class="arr" marker-end="url(#a2)"/>
+<line x1="340" y1="204" x2="340" y2="230" class="arr" marker-end="url(#a2)"/>
+<line x1="145" y1="288" x2="145" y2="348" class="arr" marker-end="url(#a2)"/>
+<line x1="535" y1="288" x2="535" y2="348" class="arr" marker-end="url(#a2)"/>
+<g class="c"><rect x="60" y="436" width="14" height="14" rx="3" stroke-width="0.8"/></g>
+<text class="ts legend" x="82" y="443" dominant-baseline="central">O'zgaradi (raqam — talab)</text>
+<g class="n"><rect x="300" y="436" width="14" height="14" rx="3" stroke-width="0.8"/></g>
+<text class="ts legend" x="322" y="443" dominant-baseline="central">O'zgarmaydi</text>
+</svg>
+</div>
+
+<h2>3. Talablar va ish holati</h2>
+<div class="card">
+<table>
+<thead><tr><th>№</th><th>Talab</th><th>Qayerda</th><th>Holat</th></tr></thead>
+<tbody>
+<tr><td class="n">1</td><td>Alohida TimeSaver oynasi, logo bilan, brauzersiz</td><td class="where">Tray, setup</td><td><span class="st ok">Kod tayyor: o'z oynasi (WebView2), tray kirillda · setup.exe da sinaladi</span></td></tr>
+<tr><td class="n">2</td><td>Yangi dizayn: 5–6 variant, siz tanlaysiz</td><td class="where">Server paneli</td><td><span class="st ok">Kod tayyor: panel 7-variant dizaynida, kirillda · trend chiziqlari API bilan ulanadi</span></td></tr>
+<tr><td class="n">3, 5</td><td>Hamma joy o'zbek kirill alifbosida</td><td class="where">Panel, bot, tray, setup</td><td><span class="st ok">Kod tayyor: bot, panel, tray, Excel sarlavhalari kirillda</span></td></tr>
+<tr><td class="n">4</td><td>Boshlang'ich sozlash soddalashtiriladi (token, admin, SQL)</td><td class="where">Sozlash ustasi</td><td><span class="st ok">Kod tayyor: 4 qadam, token o'zi tekshiriladi, /start bilan admin, SQL avtomatik topiladi</span></td></tr>
+<tr><td class="n">5</td><td>Bot panellari dizayni: mijoz, filial xodimi, admin (Telegram)</td><td class="where">Bot yadrosi</td><td><span class="st ok">Navigatsiya kodi tayyor: bitta panel xabari, ichma-ich menyular (315 test)</span></td></tr>
+<tr><td class="n">6</td><td>Filialga Srok va 30+ kun: A/B/C (80/15/5 pul), 20 ta + Excel</td><td class="where">Bot, panel</td><td><span class="st ok">Kod tayyor: filialga Srok / 30+ kun A·B·C, 20 ta + Excel</span></td></tr>
+<tr><td class="n">7</td><td>«📊 Сотув ва қолдиқ»: har dori alohida blokda — filiallar bo'yicha nechta sotildi / nechta bor, jami, necha kunga yetadi; tartib: Сотув / Тугаяпти / А–Я; firma vakili, xodim va admin uchun</td><td class="where">Bot yadrosi</td><td><span class="st ok">Kod tayyor: har dori alohida blok, saralash, firma tanlash</span></td></tr>
+<tr><td class="n">8</td><td>Ko'chiriladigan dorilar ham A/B/C ga (pul bo'yicha 80/15/5); server panelida A/B/C bo'yicha «Бажарилди» va «Бажарилмади» alohida ro'yxat; botda filialga ham</td><td class="where">Panel, bot</td><td><span class="st ok">Kod tayyor: botda A·B·C belgilari, panelda «Кўчириш · ABC»</span></td></tr>
+<tr><td class="n">9</td><td>Ko'chirishni qoldiqdan avtomatik aniqlash: beruvchida kamaydi + oluvchida ko'paydi → «олинди (тизим)»; tugmalar zaxira; har 1 soatda avtomatik yangilash (08:00–20:00)</td><td class="where">Bot yadrosi, Excel o'qish, panel</td><td><span class="st ok">Kod tayyor: qoldiqdan aniqlash, admin ogohlantirish, har soatlik yangilash</span></td></tr>
+<tr><td class="n">10</td><td>«🧾 Буюртма» → firma vakili tugagan dorilarni tanlab adminga so'rov yuboradi (bir nechta dori); admin har biriga «Ҳа» / sonini o'zgartiradi (20 → 10) / rad; javob firmaga boradi, ro'yxat + Excel</td><td class="where">Bot yadrosi, panel</td><td><span class="st ok">Kod tayyor: savat → admin karta (Ҳа / son / rad) → javob; panelda ham</span></td></tr>
+<tr><td class="n">—</td><td>Testlar</td><td class="where">app/tests</td><td><span class="st ok">454 test o\'tdi · mustaqil tekshiruv topilmalari tuzatildi</span></td></tr>
+<tr><td class="n">—</td><td>Setup.exe yig'ish (oxirida, so'rab)</td><td class="where">build.ps1</td><td><span class="st todo">Navbatda</span></td></tr>
+<tr><td class="n">✓</td><td>Xavfsizlik va xatolar tekshiruvi, 13 ta tuzatish</td><td class="where">Bot, panel, SQL</td><td><span class="st ok">Bajarildi</span></td></tr>
+</tbody>
+</table>
+<div class="upd">Ochiq savol: Excel hisobotlari (ustun nomlari) ham kirillga o'tadimi? Javob bo'lmasa — o'tadi.</div>
+</div>
+<p class="upd">Oxirgi yangilanish: 18.11.2026</p>
+</main>
+</body>
+</html>

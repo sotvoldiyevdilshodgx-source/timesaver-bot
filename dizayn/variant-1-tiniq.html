@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="uz-Cyrl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TimeSaver — Вариант 1: Тиниқ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: Windows-ойна 1280×800 марказда · тинч ён меню 236px · асосий майдон: сарлавҳа → 4 кўрсаткич → ABC карта + кўчириш/тасдиқ устуни */
+:root{
+  --page:#ECEAE5;        /* ойна ташқариси, илиқ нейтрал */
+  --win:#F8F7F4;         /* ойна асоси */
+  --side:#F2F1ED;        /* ён меню */
+  --surface:#FFFFFF;     /* карталар */
+  --line:#E4E2DC;        /* ингичка чегара */
+  --line-2:#EEECE7;
+  --ink:#191B23;
+  --ink-2:#4A4D58;
+  --muted:#6C6F79;
+  --accent:#1F2A6B;      /* бренд тўқ кўк */
+  --accent-ink:#FFFFFF;
+  --accent-hover:#18215A;
+  --accent-soft:#E9EBF5;
+  --accent-text:#1F2A6B;
+  --lime:#D4F06A;
+  --lime-ink:#2F3A07;
+  --peach:#FF9E7A;
+  --hover:#ECEBE6;
+  --track:#E9E7E1;
+  --seg-a:#1F2A6B; --seg-b:#6D79C2; --seg-c:#C3C8E4;
+  --good:#1E7A4C; --good-bg:#E5F2EA;
+  --warn:#9A5B00; --warn-bg:#FBF0DC;
+  --crit:#B42318; --crit-bg:#FBE7E5;
+  --badge:#D92D20; --badge-ink:#FFFFFF;
+  --close:#C42B1C;
+  --shadow:0 1px 0 rgba(25,27,35,.04), 0 24px 60px -24px rgba(31,42,107,.22), 0 8px 24px -12px rgba(25,27,35,.12);
+  --font:"Golos Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --r-sm:6px; --r:8px; --r-lg:10px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page:#111214; --win:#1B1C1F; --side:#18191C; --surface:#222327;
+    --line:#2E3035; --line-2:#292A2F;
+    --ink:#ECECEE; --ink-2:#C2C4CB; --muted:#9A9DA6;
+    --accent:#4B5BC6; --accent-ink:#FFFFFF; --accent-hover:#5868D2;
+    --accent-soft:#272B45; --accent-text:#B3BCF5;
+    --lime:#D4F06A; --lime-ink:#2F3A07; --peach:#FF9E7A;
+    --hover:#26272B; --track:#303237;
+    --seg-a:#B3BCF5; --seg-b:#6C79CC; --seg-c:#3F4675;
+    --good:#6FD39A; --good-bg:#1E3229; --warn:#F2B862; --warn-bg:#3A2E1A; --crit:#FF8A80; --crit-bg:#3D2223;
+    --badge:#E5484D; --badge-ink:#FFFFFF; --close:#C42B1C;
+    --shadow:0 0 0 1px rgba(255,255,255,.03), 0 30px 70px -20px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#111214; --win:#1B1C1F; --side:#18191C; --surface:#222327;
+  --line:#2E3035; --line-2:#292A2F;
+  --ink:#ECECEE; --ink-2:#C2C4CB; --muted:#9A9DA6;
+  --accent:#4B5BC6; --accent-ink:#FFFFFF; --accent-hover:#5868D2;
+  --accent-soft:#272B45; --accent-text:#B3BCF5;
+  --lime:#D4F06A; --lime-ink:#2F3A07; --peach:#FF9E7A;
+  --hover:#26272B; --track:#303237;
+  --seg-a:#B3BCF5; --seg-b:#6C79CC; --seg-c:#3F4675;
+  --good:#6FD39A; --good-bg:#1E3229; --warn:#F2B862; --warn-bg:#3A2E1A; --crit:#FF8A80; --crit-bg:#3D2223;
+  --badge:#E5484D; --badge-ink:#FFFFFF; --close:#C42B1C;
+  --shadow:0 0 0 1px rgba(255,255,255,.03), 0 30px 70px -20px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--page); color:var(--ink); font-family:var(--font); font-size:13px; line-height:1.45;
+  -webkit-font-smoothing:antialiased; font-feature-settings:"tnum" 1;
+  padding-block:40px 32px; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px));
+  transition:background-color .2s ease;
+}
+.stage{overflow-x:auto; padding-bottom:4px}
+button{font:inherit; color:inherit; cursor:pointer}
+svg{display:block}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--accent-text); outline-offset:2px; border-radius:4px}
+
+/* ---------- Ойна ---------- */
+.window{
+  width:1280px; height:800px; margin:0 auto; background:var(--win);
+  border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow);
+  display:grid; grid-template-rows:36px 1fr; overflow:hidden;
+}
+.titlebar{display:flex; align-items:center; background:var(--side); border-bottom:1px solid var(--line); user-select:none}
+.titlebar .brand{display:flex; align-items:center; gap:8px; padding-left:14px; font-weight:600; font-size:12.5px; letter-spacing:.01em}
+.titlebar .brand svg{width:18px; height:18px}
+.titlebar .crumb{color:var(--muted); font-weight:400; margin-left:2px}
+.titlebar .spacer{flex:1}
+.theme-btn{
+  display:flex; align-items:center; gap:6px; height:26px; padding:0 10px; margin-right:8px;
+  border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface); color:var(--ink-2); font-size:12px;
+}
+.theme-btn:hover{background:var(--hover); color:var(--ink)}
+.theme-btn svg{width:14px; height:14px}
+.theme-btn .i-moon{display:none}
+:root[data-mode="dark"] .theme-btn .i-sun{display:none}
+:root[data-mode="dark"] .theme-btn .i-moon{display:block}
+.wctl{display:flex; height:100%}
+.wctl button{width:46px; height:100%; border:0; background:transparent; display:grid; place-items:center; color:var(--ink-2)}
+.wctl button:hover{background:var(--hover); color:var(--ink)}
+.wctl button.x:hover{background:var(--close); color:#FFFFFF}
+.wctl svg{width:10px; height:10px}
+
+.app{display:grid; grid-template-columns:236px 1fr; min-height:0}
+
+/* ---------- Ён меню ---------- */
+.side{background:var(--side); border-right:1px solid var(--line); display:flex; flex-direction:column; padding:12px 10px; gap:14px; min-height:0}
+.search{
+  display:flex; align-items:center; gap:8px; height:32px; padding:0 10px;
+  border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface); color:var(--muted);
+}
+.search svg{width:14px; height:14px}
+.nav{display:flex; flex-direction:column; gap:14px}
+.group{display:flex; flex-direction:column; gap:1px}
+.group-label{font-size:11px; font-weight:500; color:var(--muted); letter-spacing:.04em; padding:0 10px 4px}
+.item{
+  display:flex; align-items:center; gap:10px; height:32px; padding:0 10px; border-radius:var(--r-sm);
+  color:var(--ink-2); text-decoration:none; font-weight:450; border:0; background:transparent; width:100%; text-align:left;
+}
+.item svg{width:16px; height:16px; flex:none; color:var(--muted)}
+.item:hover{background:var(--hover); color:var(--ink)}
+.item:hover svg{color:var(--ink-2)}
+.item.active{background:var(--accent-soft); color:var(--accent-text); font-weight:600}
+.item.active svg{color:var(--accent-text)}
+.item .lbl{flex:1}
+.pill{font-size:11px; font-weight:600; line-height:18px; height:18px; padding:0 6px; border-radius:9px; font-variant-numeric:tabular-nums}
+.pill.red{background:var(--badge); color:var(--badge-ink); min-width:18px; text-align:center}
+.pill.soft{background:transparent; color:var(--muted); border:1px solid var(--line); line-height:16px; display:flex; align-items:center; gap:5px}
+.ring{width:10px; height:10px}
+.side-foot{margin-top:auto; border-top:1px solid var(--line); padding-top:10px; display:flex; align-items:center; gap:10px; padding-inline:6px}
+.avatar{width:30px; height:30px; border-radius:50%; background:var(--accent-soft); color:var(--accent-text); display:grid; place-items:center; font-weight:600; font-size:12px; flex:none}
+.who{min-width:0; flex:1}
+.who b{display:block; font-weight:600; font-size:12.5px}
+.who span{color:var(--muted); font-size:11.5px}
+.conn{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--muted)}
+.dot{width:7px; height:7px; border-radius:50%; background:var(--lime); box-shadow:0 0 0 1.5px var(--lime-ink) inset; flex:none}
+
+/* ---------- Асосий майдон ---------- */
+.main{overflow:auto; padding:26px 28px 24px; display:flex; flex-direction:column; gap:20px; min-width:0}
+.head{display:flex; align-items:flex-end; justify-content:space-between; gap:24px}
+.head h1{margin:0; font-size:22px; line-height:1.2; font-weight:600; letter-spacing:-.015em; text-wrap:balance}
+.status{display:flex; align-items:center; gap:8px; margin-top:8px; color:var(--ink-2); font-size:13px}
+.status .sep{color:var(--muted)}
+.status .src{color:var(--muted)}
+.actions{display:flex; gap:8px; flex:none}
+.btn{
+  height:34px; padding:0 14px; display:inline-flex; align-items:center; gap:8px; border-radius:var(--r-sm);
+  font-weight:500; font-size:13px; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+  transition:background-color .12s ease, border-color .12s ease;
+}
+.btn svg{width:15px; height:15px}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.btn.primary:hover{background:var(--accent-hover); border-color:var(--accent-hover)}
+.btn.ghost{border-color:transparent; background:transparent; color:var(--accent-text); padding:0 8px; height:30px}
+.btn.ghost:hover{background:var(--accent-soft)}
+.kbd{font-size:11px; color:rgba(255,255,255,.7); border-left:1px solid rgba(255,255,255,.25); padding-left:8px; margin-left:2px}
+
+/* Кўрсаткичлар */
+.kpis{display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--line); border-radius:var(--r-lg); background:var(--surface)}
+.kpi{padding:14px 18px 15px; display:flex; flex-direction:column; gap:4px; border-left:1px solid var(--line-2); position:relative; text-decoration:none; color:inherit}
+.kpi:first-child{border-left:0}
+.kpi:hover{background:var(--hover)}
+.kpi:first-child:hover{border-radius:var(--r-lg) 0 0 var(--r-lg)}
+.kpi:last-child:hover{border-radius:0 var(--r-lg) var(--r-lg) 0}
+.kpi .k-lbl{color:var(--muted); font-size:12.5px; display:flex; align-items:center; gap:6px}
+.kpi .k-val{font-size:28px; font-weight:600; letter-spacing:-.02em; line-height:1.15; font-variant-numeric:tabular-nums}
+.kpi .k-sub{color:var(--muted); font-size:12px}
+.kpi .k-sub.attn{color:var(--crit); font-weight:500; display:flex; align-items:center; gap:4px}
+.kpi .k-sub.attn svg{width:12px; height:12px}
+
+/* Карталар */
+.grid{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:16px; align-items:start}
+.col{display:flex; flex-direction:column; gap:16px; min-width:0}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); min-width:0}
+.card-h{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:16px 18px 0}
+.card-h h2{margin:0; font-size:14.5px; font-weight:600; letter-spacing:-.005em; display:flex; align-items:center; gap:8px}
+.card-h p{margin:3px 0 0; color:var(--muted); font-size:12.5px}
+.new{font-size:10.5px; font-weight:600; letter-spacing:.04em; background:var(--lime); color:var(--lime-ink); padding:1px 7px; border-radius:4px; line-height:16px}
+.meta{color:var(--muted); font-size:12.5px; white-space:nowrap}
+.meta b{color:var(--ink); font-weight:600}
+
+/* ABC tabs */
+.tabs{display:grid; grid-template-columns:repeat(3,1fr); gap:4px; margin:14px 18px 0; padding:3px; background:var(--win); border:1px solid var(--line-2); border-radius:var(--r)}
+.tab{border:0; background:transparent; border-radius:6px; padding:7px 10px; display:flex; align-items:center; gap:10px; text-align:left; color:var(--ink-2)}
+.tab:hover{background:var(--hover)}
+.tab.on{background:var(--surface); color:var(--ink); box-shadow:0 0 0 1px var(--line), 0 1px 2px rgba(25,27,35,.06)}
+.tab .letter{width:22px; height:22px; border-radius:5px; display:grid; place-items:center; font-weight:700; font-size:12px; flex:none; border:1px solid var(--line); color:var(--ink-2)}
+.tab.on .letter{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.tab .t-meta{font-size:12.5px; font-variant-numeric:tabular-nums; white-space:nowrap}
+.tab .t-meta b{font-weight:600}
+.tab .t-meta span{color:var(--muted)}
+
+.share{margin:12px 18px 0; display:flex; flex-direction:column; gap:6px}
+.share-bar{display:flex; gap:2px; height:6px}
+.share-bar i{display:block; height:100%; border-radius:2px}
+.share-bar i:first-child{border-radius:3px 2px 2px 3px}
+.share-bar i:last-child{border-radius:2px 3px 3px 2px}
+.share-legend{display:flex; gap:16px; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
+.share-legend span{display:flex; align-items:center; gap:6px}
+.share-legend em{font-style:normal; color:var(--ink); font-weight:500}
+.sw{width:8px; height:8px; border-radius:2px; display:inline-block}
+
+.tbl-wrap{margin-top:10px; overflow-x:auto}
+table{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+th{font-size:11.5px; font-weight:500; color:var(--muted); text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap}
+td{padding:0 10px; height:40px; border-bottom:1px solid var(--line-2); white-space:nowrap}
+th:first-child, td:first-child{padding-left:18px; width:34px; color:var(--muted)}
+th:last-child, td:last-child{padding-right:18px}
+.r{text-align:right}
+tbody tr:hover td{background:var(--hover)}
+td.drug{font-weight:500; color:var(--ink)}
+.due{display:flex; align-items:center; gap:8px}
+.days{font-size:11.5px; color:var(--muted)}
+.days.soon{color:var(--warn); font-weight:500}
+.sum{display:flex; align-items:center; justify-content:flex-end; gap:10px}
+.mini{width:44px; height:4px; background:var(--track); border-radius:2px; overflow:hidden}
+.mini i{display:block; height:100%; background:var(--seg-a); border-radius:2px}
+.cur{color:var(--muted); font-weight:400}
+.card-f{display:flex; align-items:center; justify-content:space-between; padding:10px 18px 12px}
+.card-f .hint{color:var(--muted); font-size:12px}
+
+/* Кўчириш */
+.branches{display:flex; flex-direction:column; padding:6px 18px 6px}
+.br{padding:12px 0; display:flex; flex-direction:column; gap:8px; border-bottom:1px solid var(--line-2)}
+.br:last-child{border-bottom:0}
+.br-top{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.br-name{font-weight:600; font-size:12.5px; letter-spacing:.02em}
+.br-right{display:flex; align-items:center; gap:10px}
+.br-pct{font-weight:600; font-variant-numeric:tabular-nums; min-width:34px; text-align:right}
+.bar{height:4px; background:var(--track); border-radius:2px; overflow:hidden}
+.bar i{display:block; height:100%; background:var(--accent-text); border-radius:2px}
+:root .bar i{background:var(--seg-a)}
+.chip{display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:500; padding:1px 7px 1px 5px; border-radius:10px; line-height:18px; font-variant-numeric:tabular-nums}
+.chip svg{width:12px; height:12px}
+.chip.good{background:var(--good-bg); color:var(--good)}
+.chip.warn{background:var(--warn-bg); color:var(--warn)}
+.chip.crit{background:var(--crit-bg); color:var(--crit)}
+
+/* Тасдиқ */
+.queue{display:flex; flex-direction:column; padding:6px 10px 10px}
+.q{display:flex; align-items:center; gap:10px; padding:8px; border-radius:var(--r-sm)}
+.q:hover{background:var(--hover)}
+.q .avatar{width:28px; height:28px; font-size:11px}
+.q .who b{font-size:12.5px; font-weight:500}
+.q .who span{font-size:11.5px}
+.q .btn{height:28px; padding:0 10px; font-size:12px}
+
+.note{max-width:1280px; margin:22px auto 0; color:var(--ink-2); font-size:13px; line-height:1.6; display:grid; gap:2px; padding-inline:4px}
+.note b{color:var(--ink); font-weight:600}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="stage">
+<div class="window" role="application" aria-label="TimeSaver">
+  <!-- Сарлавҳа сатри -->
+  <header class="titlebar">
+    <div class="brand">
+      <svg viewBox="-85 -85 170 170" aria-hidden="true"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+      TimeSaver <span class="crumb">· Бош саҳифа</span>
+    </div>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Мавзуни алмаштириш">
+      <svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/></svg>
+      <svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.5 9.6A5.8 5.8 0 0 1 6.4 2.5a5.8 5.8 0 1 0 7.1 7.1Z"/></svg>
+      <span id="themeLbl">Ёруғ</span>
+    </button>
+    <div class="wctl">
+      <button type="button" aria-label="Йиғиш"><svg viewBox="0 0 10 10" stroke="currentColor" stroke-width="1"><path d="M0 5.5h10"/></svg></button>
+      <button type="button" aria-label="Катталаштириш"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="9" height="9" rx="1"/></svg></button>
+      <button type="button" class="x" aria-label="Ёпиш"><svg viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.1"><path d="M0.5 0.5l9 9M9.5 0.5l-9 9"/></svg></button>
+    </div>
+  </header>
+
+  <div class="app">
+    <!-- Ён меню -->
+    <aside class="side">
+      <div class="search">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+        Қидириш…
+      </div>
+
+      <nav class="nav" aria-label="Асосий меню">
+        <div class="group">
+          <button class="item active" type="button" aria-current="page">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2.5 7 8 2.5 13.5 7v6a.5.5 0 0 1-.5.5H9.75V10h-3.5v3.5H3a.5.5 0 0 1-.5-.5Z"/></svg>
+            <span class="lbl">Бош саҳифа</span>
+          </button>
+          <button class="item" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 5.5h10M10 3l2.5 2.5L10 8M13.5 10.5h-10M6 8l-2.5 2.5L6 13"/></svg>
+            <span class="lbl">Кўчириш</span>
+            <span class="pill soft" title="Бугунги кўчириш бажарилиши">
+              <svg class="ring" viewBox="0 0 10 10"><circle cx="5" cy="5" r="3.8" fill="none" stroke="var(--track)" stroke-width="1.6"/><circle cx="5" cy="5" r="3.8" fill="none" stroke="var(--seg-a)" stroke-width="1.6" stroke-dasharray="19.6 23.9" stroke-linecap="round" transform="rotate(-90 5 5)"/></svg>82%</span>
+          </button>
+          <button class="item" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2.5 5.5 8 2.5l5.5 3v7.5h-11Z"/><path d="M5 13V8.5h6V13M5 10.75h6"/></svg>
+            <span class="lbl">Склад</span>
+          </button>
+          <button class="item" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="2.5" width="10" height="11.5" rx="1.5"/><path d="M6 2.5v1.5h4V2.5M5.75 7.5h4.5M5.75 10.5h3"/></svg>
+            <span class="lbl">Буюртма</span>
+          </button>
+        </div>
+
+        <div class="group">
+          <div class="group-label">Мижозлар</div>
+          <button class="item" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="5.5" r="2.5"/><path d="M1.75 13.5a4.25 4.25 0 0 1 8.5 0M10.5 3.2a2.5 2.5 0 0 1 0 4.6M12 9.6a4.25 4.25 0 0 1 2.25 3.9"/></svg>
+            <span class="lbl">Фойдаланувчилар</span>
+            <span class="pill red" title="3 та тасдиқ кутмоқда">3</span>
+          </button>
+          <button class="item" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M14 2 7 9M14 2l-4.5 12L7 9 2 6.5Z"/></svg>
+            <span class="lbl">Хабар юбориш</span>
+          </button>
+          <button class="item" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2H4.5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V5Z"/><path d="M9.5 2v3h3M6 8.5h4M6 11h4"/></svg>
+            <span class="lbl">Ҳисоботлар</span>
+          </button>
+        </div>
+
+        <div class="group">
+          <div class="group-label">Тизим</div>
+          <button class="item" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 13.5h11M4.5 11V8M8 11V4M11.5 11V6.5"/></svg>
+            <span class="lbl">Статистика</span>
+          </button>
+          <button class="item" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 4h7.5M6 8h7.5M6 12h7.5"/><circle cx="3" cy="4" r=".6" fill="currentColor"/><circle cx="3" cy="8" r=".6" fill="currentColor"/><circle cx="3" cy="12" r=".6" fill="currentColor"/></svg>
+            <span class="lbl">Журнал</span>
+          </button>
+          <button class="item" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4.5h5M10.5 4.5h3M2.5 11.5h2M7.5 11.5h6"/><circle cx="9" cy="4.5" r="1.5"/><circle cx="6" cy="11.5" r="1.5"/></svg>
+            <span class="lbl">Созламалар</span>
+          </button>
+          <button class="item" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 13.5 8-8M9 4l1.5 1.5"/><path d="M12 1.75v2M11 2.75h2M13.5 7v1.5M12.75 7.75h1.5M5.5 2v1.5M4.75 2.75h1.5"/></svg>
+            <span class="lbl">Созлаш устаси</span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="side-foot">
+        <div class="avatar">МФ</div>
+        <div class="who"><b>Намуна Фарм</b><span>Администратор</span></div>
+        <div class="conn" title="Бот ишлаяпти"><span class="dot"></span>Бот</div>
+      </div>
+    </aside>
+
+    <!-- Асосий майдон -->
+    <main class="main">
+      <div class="head">
+        <div>
+          <h1>Хайрли кун, Намуна Фарм</h1>
+          <div class="status">
+            <span class="dot" aria-hidden="true"></span>
+            <span>Маълумот янгиланди · бугун <span class="num">08:42</span></span>
+            <span class="sep">·</span>
+            <span class="src">Excel база, 3 филиал</span>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.6 2.6a3.5 3.5 0 0 0-4.4 4.4L2 10.2a1.4 1.4 0 0 0 2 2L7.1 9a3.5 3.5 0 0 0 4.4-4.4L9.4 6.6 8 6.2l-.4-1.4Z"/></svg>
+            Техник режим
+          </button>
+          <button class="btn primary" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 8a5.5 5.5 0 0 1-9.6 3.7M2.5 8a5.5 5.5 0 0 1 9.6-3.7"/><path d="M12.5 1.75v2.75H9.75M3.5 14.25V11.5h2.75"/></svg>
+            Янгилаш
+          </button>
+        </div>
+      </div>
+
+      <section class="kpis" aria-label="Кўрсаткичлар">
+        <a class="kpi" href="#">
+          <span class="k-lbl">Срок яқин (90 кун)</span>
+          <span class="k-val">128</span>
+          <span class="k-sub">дори позицияси</span>
+        </a>
+        <a class="kpi" href="#">
+          <span class="k-lbl">30+ кун турган</span>
+          <span class="k-val">342</span>
+          <span class="k-sub">ҳаракатсиз позиция</span>
+        </a>
+        <a class="kpi" href="#">
+          <span class="k-lbl">Фойдаланувчилар</span>
+          <span class="k-val">57</span>
+          <span class="k-sub">ботда рўйхатдан ўтган</span>
+        </a>
+        <a class="kpi" href="#">
+          <span class="k-lbl">Тасдиқ кутмоқда</span>
+          <span class="k-val">3</span>
+          <span class="k-sub attn">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="6" r="4.75"/><path d="M6 3.5V6.5M6 8.4v.1"/></svg>
+            Кўриб чиқиш керак
+          </span>
+        </a>
+      </section>
+
+      <div class="grid">
+        <!-- ABC таҳлил -->
+        <section class="card" aria-labelledby="abcTitle">
+          <div class="card-h">
+            <div>
+              <h2 id="abcTitle">Срок · ABC таҳлил <span class="new">ЯНГИ</span></h2>
+              <p>Муддати яқин дорилар пул бўйича. A — жами пулнинг 80% и.</p>
+            </div>
+            <div class="meta">Жами <b class="num">53,3 млн</b> сўм</div>
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="ABC гуруҳлари">
+            <button class="tab on" role="tab" aria-selected="true" type="button"><span class="letter">A</span><span class="t-meta"><b>20 та</b> <span>· 42,6 млн</span></span></button>
+            <button class="tab" role="tab" aria-selected="false" type="button"><span class="letter">B</span><span class="t-meta"><b>31 та</b> <span>· 8,0 млн</span></span></button>
+            <button class="tab" role="tab" aria-selected="false" type="button"><span class="letter">C</span><span class="t-meta"><b>77 та</b> <span>· 2,7 млн</span></span></button>
+          </div>
+
+          <div class="share">
+            <div class="share-bar" role="img" aria-label="Пул улуши: A 80%, B 15%, C 5%">
+              <i style="width:80%; background:var(--seg-a)" title="A · 42,6 млн сўм · 80%"></i>
+              <i style="width:15%; background:var(--seg-b)" title="B · 8,0 млн сўм · 15%"></i>
+              <i style="width:5%; background:var(--seg-c)" title="C · 2,7 млн сўм · 5%"></i>
+            </div>
+            <div class="share-legend">
+              <span><i class="sw" style="background:var(--seg-a)"></i>A <em>80%</em></span>
+              <span><i class="sw" style="background:var(--seg-b)"></i>B <em>15%</em></span>
+              <span><i class="sw" style="background:var(--seg-c)"></i>C <em>5%</em></span>
+            </div>
+          </div>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Дори</th><th>Муддат</th><th class="r">Қолдиқ</th><th class="r">Сумма, сўм</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td class="drug">Аугментин 625мг №14</td><td><span class="due">12.01.2027 <span class="days">56 кун</span></span></td><td class="r">46</td><td><span class="sum"><span class="mini"><i style="width:100%"></i></span>8 740 000</span></td></tr>
+                <tr><td>2</td><td class="drug">Эссенциале форте №30</td><td><span class="due">28.12.2026 <span class="days">41 кун</span></span></td><td class="r">38</td><td><span class="sum"><span class="mini"><i style="width:71.7%"></i></span>6 270 000</span></td></tr>
+                <tr><td>3</td><td class="drug">Нурофен 200мг №24</td><td><span class="due">03.02.2027 <span class="days">78 кун</span></span></td><td class="r">120</td><td><span class="sum"><span class="mini"><i style="width:46.7%"></i></span>4 080 000</span></td></tr>
+                <tr><td>4</td><td class="drug">Линекс №16</td><td><span class="due">19.01.2027 <span class="days">63 кун</span></span></td><td class="r">54</td><td><span class="sum"><span class="mini"><i style="width:40.2%"></i></span>3 510 000</span></td></tr>
+                <tr><td>5</td><td class="drug">Цитрамон П №10</td><td><span class="due">07.12.2026 <span class="days soon">20 кун</span></span></td><td class="r">300</td><td><span class="sum"><span class="mini"><i style="width:18.9%"></i></span>1 650 000</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card-f">
+            <span class="hint">5 / 20 кўрсатилди · пул бўйича камайиш</span>
+            <button class="btn ghost" type="button">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v7.5M4.75 7 8 10.25 11.25 7M3 13.5h10"/></svg>
+              Яна 15 та · Excel'да юклаб олиш
+            </button>
+          </div>
+        </section>
+
+        <div class="col">
+          <!-- Бугунги кўчириш -->
+          <section class="card" aria-labelledby="trTitle">
+            <div class="card-h">
+              <div>
+                <h2 id="trTitle">Бугунги кўчириш</h2>
+                <p>Филиаллар ўртасида бажарилиши</p>
+              </div>
+              <div class="meta">Умумий <b class="num">82%</b></div>
+            </div>
+            <div class="branches">
+              <div class="br">
+                <div class="br-top">
+                  <span class="br-name">ДОРИХОНА ЧИНОЗ</span>
+                  <span class="br-right">
+                    <span class="chip good"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2.75 6.25 2 2 4.5-4.5"/></svg>0 кечикди</span>
+                    <span class="br-pct">92%</span>
+                  </span>
+                </div>
+                <div class="bar" title="92% бажарилди"><i style="width:92%"></i></div>
+              </div>
+              <div class="br">
+                <div class="br-top">
+                  <span class="br-name">ДОРИХОНА УРГУТ</span>
+                  <span class="br-right">
+                    <span class="chip warn"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="6" cy="6" r="4.5"/><path d="M6 3.5V6l1.6 1"/></svg>2 кечикди</span>
+                    <span class="br-pct">76%</span>
+                  </span>
+                </div>
+                <div class="bar" title="76% бажарилди"><i style="width:76%"></i></div>
+              </div>
+              <div class="br">
+                <div class="br-top">
+                  <span class="br-name">ДОРИХОНА ЭРКИН</span>
+                  <span class="br-right">
+                    <span class="chip crit"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6 1.75 10.75 10H1.25Z" stroke-linejoin="round"/><path d="M6 5v2.2M6 8.6v.1"/></svg>4 кечикди</span>
+                    <span class="br-pct">64%</span>
+                  </span>
+                </div>
+                <div class="bar" title="64% бажарилди"><i style="width:64%"></i></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Тасдиқ кутмоқда -->
+          <section class="card" aria-labelledby="qTitle">
+            <div class="card-h">
+              <div>
+                <h2 id="qTitle">Тасдиқ кутмоқда</h2>
+                <p>Ботда янги рўйхатдан ўтганлар</p>
+              </div>
+              <div class="meta"><b class="num">3</b> та</div>
+            </div>
+            <div class="queue">
+              <div class="q"><div class="avatar">ДК</div><div class="who"><b>Дилноза Каримова</b><span>Чиноз · фармацевт</span></div><button class="btn" type="button">Тасдиқлаш</button></div>
+              <div class="q"><div class="avatar">ЖТ</div><div class="who"><b>Жасур Тошматов</b><span>Ургут · омборчи</span></div><button class="btn" type="button">Тасдиқлаш</button></div>
+              <div class="q"><div class="avatar">СЮ</div><div class="who"><b>Санжар Юсупов</b><span>Эркин · фармацевт</span></div><button class="btn" type="button">Тасдиқлаш</button></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</div>
+
+<div class="note">
+  <div><b>Вариант 1 «Тиниқ».</b> Linear ва Notion руҳидаги сокин минимализм: илиқ нейтрал фон, ингичка чизиқлар, битта урғу ранги — тўқ кўк, лайм эса фақат кичик белги сифатида.</div>
+  <div><b>Кимга мос:</b> панелни ҳар куни узоқ вақт очиб ишлайдиган менежер ва администратор учун — кўз чарчамайди, керакли рақам бир қарашда топилади.</div>
+  <div><b>Кучли томони:</b> ортиқча безак йўқ, ҳолат ранг ва белги билан кўрсатилади, қоронғи мавзу юмшоқ графит рангда.</div>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement, KEY="ts-theme-v1";
+  var mq=window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+  function current(){ var t=root.getAttribute("data-theme"); if(t) return t; return mq && mq.matches ? "dark" : "light"; }
+  function paint(){ var m=current(); root.setAttribute("data-mode",m); var l=document.getElementById("themeLbl"); if(l) l.textContent = m==="dark" ? "Қоронғи" : "Ёруғ"; }
+  try{ var saved=localStorage.getItem(KEY); if(saved==="dark"||saved==="light") root.setAttribute("data-theme",saved); }catch(e){}
+  paint();
+  if(mq && mq.addEventListener) mq.addEventListener("change",paint);
+  document.getElementById("themeBtn").addEventListener("click",function(){
+    var next = current()==="dark" ? "light" : "dark";
+    root.setAttribute("data-theme",next);
+    try{ localStorage.setItem(KEY,next); }catch(e){}
+    paint();
+  });
+  document.querySelectorAll(".tab").forEach(function(t){
+    t.addEventListener("click",function(){
+      document.querySelectorAll(".tab").forEach(function(x){ x.classList.remove("on"); x.setAttribute("aria-selected","false"); });
+      t.classList.add("on"); t.setAttribute("aria-selected","true");
+    });
+  });
+  document.querySelectorAll('a[href="#"]').forEach(function(a){ a.addEventListener("click",function(e){ e.preventDefault(); }); });
+})();
+</script>
+</body>
+</html>

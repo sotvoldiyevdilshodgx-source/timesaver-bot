@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="uz-Cyrl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TimeSaver — Вариант 2: Ойна</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a native Windows 11 app window (Mica backdrop over a soft wallpaper),
+   acrylic navigation pane on the left, content on a raised layer with cards. */
+:root {
+  --font: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", "Inter", system-ui, sans-serif;
+  --font-display: "Segoe UI Variable Display", "Segoe UI Variable", "Segoe UI", "Inter", system-ui, sans-serif;
+
+  /* wallpaper */
+  --wall-base: #DCE3F4;
+  --wall-1: #B8C5EE;
+  --wall-2: #EEF6CF;
+  --wall-3: #FFD8C8;
+  --wall-4: #9FB0E6;
+
+  /* surfaces */
+  --mica: rgba(238, 241, 250, 0.80);
+  --pane: rgba(255, 255, 255, 0.22);
+  --layer: rgba(255, 255, 255, 0.56);
+  --layer-stroke: rgba(0, 0, 0, 0.06);
+  --card: rgba(255, 255, 255, 0.74);
+  --card-hover: rgba(255, 255, 255, 0.92);
+  --card-stroke: rgba(0, 0, 0, 0.065);
+  --subtle-hover: rgba(0, 0, 0, 0.042);
+  --subtle-press: rgba(0, 0, 0, 0.026);
+  --selected: rgba(0, 0, 0, 0.055);
+  --divider: rgba(0, 0, 0, 0.08);
+  --ctrl: rgba(255, 255, 255, 0.78);
+  --ctrl-hover: rgba(249, 249, 251, 0.95);
+  --ctrl-stroke: rgba(0, 0, 0, 0.075);
+  --ctrl-stroke-b: rgba(0, 0, 0, 0.16);
+  --input: rgba(255, 255, 255, 0.72);
+
+  /* text */
+  --text: #1B1D2A;
+  --text-2: #4F5368;
+  --text-3: #62667A;
+
+  /* brand accent: navy in light */
+  --accent: #1F2A6B;
+  --accent-hover: #2B3889;
+  --on-accent: #FFFFFF;
+  --accent-text: #1F2A6B;
+  --accent-soft: rgba(31, 42, 107, 0.09);
+  --seg-b: rgba(31, 42, 107, 0.48);
+  --seg-c: rgba(31, 42, 107, 0.22);
+  --track: rgba(0, 0, 0, 0.09);
+  --peach: #FF9E7A;
+
+  /* status */
+  --good: #0E700E;
+  --good-bg: #DFF6DD;
+  --warn: #8A5300;
+  --warn-bg: #FFF4CE;
+  --crit: #C42B1C;
+  --crit-bg: #FDE7E9;
+  --badge-bg: #C42B1C;
+  --badge-fg: #FFFFFF;
+
+  --focus: #1B1D2A;
+  --close-hover: #C42B1C;
+  --shadow: 0 32px 64px rgba(16, 24, 64, 0.22), 0 2px 21px rgba(16, 24, 64, 0.14);
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --note-bg: rgba(255, 255, 255, 0.55);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --wall-base: #0B0F27; --wall-1: #1F2A6B; --wall-2: #2C3E1C; --wall-3: #4A2A2A; --wall-4: #18205A;
+    --mica: rgba(30, 32, 44, 0.84); --pane: rgba(255, 255, 255, 0.025); --layer: rgba(255, 255, 255, 0.035);
+    --layer-stroke: rgba(0, 0, 0, 0.28); --card: rgba(255, 255, 255, 0.05); --card-hover: rgba(255, 255, 255, 0.08);
+    --card-stroke: rgba(255, 255, 255, 0.075); --subtle-hover: rgba(255, 255, 255, 0.06); --subtle-press: rgba(255, 255, 255, 0.04);
+    --selected: rgba(255, 255, 255, 0.07); --divider: rgba(255, 255, 255, 0.08); --ctrl: rgba(255, 255, 255, 0.06);
+    --ctrl-hover: rgba(255, 255, 255, 0.09); --ctrl-stroke: rgba(255, 255, 255, 0.075); --ctrl-stroke-b: rgba(255, 255, 255, 0.05);
+    --input: rgba(255, 255, 255, 0.055);
+    --text: #F3F4F8; --text-2: #BCC0CF; --text-3: #A2A7B8;
+    --accent: #D4F06A; --accent-hover: #E0F68E; --on-accent: #1F2A6B; --accent-text: #D4F06A;
+    --accent-soft: rgba(212, 240, 106, 0.12); --seg-b: rgba(212, 240, 106, 0.50); --seg-c: rgba(212, 240, 106, 0.24);
+    --track: rgba(255, 255, 255, 0.10);
+    --good: #6CCB5F; --good-bg: rgba(108, 203, 95, 0.14); --warn: #FCE100; --warn-bg: rgba(252, 225, 0, 0.12);
+    --crit: #FF99A4; --crit-bg: rgba(255, 153, 164, 0.14); --badge-bg: #FF99A4; --badge-fg: #1B0A0C;
+    --focus: #FFFFFF; --close-hover: #C42B1C;
+    --shadow: 0 32px 64px rgba(0, 0, 0, 0.55), 0 2px 21px rgba(0, 0, 0, 0.4);
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --note-bg: rgba(20, 22, 34, 0.55);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --wall-base: #0B0F27; --wall-1: #1F2A6B; --wall-2: #2C3E1C; --wall-3: #4A2A2A; --wall-4: #18205A;
+  --mica: rgba(30, 32, 44, 0.84); --pane: rgba(255, 255, 255, 0.025); --layer: rgba(255, 255, 255, 0.035);
+  --layer-stroke: rgba(0, 0, 0, 0.28); --card: rgba(255, 255, 255, 0.05); --card-hover: rgba(255, 255, 255, 0.08);
+  --card-stroke: rgba(255, 255, 255, 0.075); --subtle-hover: rgba(255, 255, 255, 0.06); --subtle-press: rgba(255, 255, 255, 0.04);
+  --selected: rgba(255, 255, 255, 0.07); --divider: rgba(255, 255, 255, 0.08); --ctrl: rgba(255, 255, 255, 0.06);
+  --ctrl-hover: rgba(255, 255, 255, 0.09); --ctrl-stroke: rgba(255, 255, 255, 0.075); --ctrl-stroke-b: rgba(255, 255, 255, 0.05);
+  --input: rgba(255, 255, 255, 0.055);
+  --text: #F3F4F8; --text-2: #BCC0CF; --text-3: #A2A7B8;
+  --accent: #D4F06A; --accent-hover: #E0F68E; --on-accent: #1F2A6B; --accent-text: #D4F06A;
+  --accent-soft: rgba(212, 240, 106, 0.12); --seg-b: rgba(212, 240, 106, 0.50); --seg-c: rgba(212, 240, 106, 0.24);
+  --track: rgba(255, 255, 255, 0.10);
+  --good: #6CCB5F; --good-bg: rgba(108, 203, 95, 0.14); --warn: #FCE100; --warn-bg: rgba(252, 225, 0, 0.12);
+  --crit: #FF99A4; --crit-bg: rgba(255, 153, 164, 0.14); --badge-bg: #FF99A4; --badge-fg: #1B0A0C;
+  --focus: #FFFFFF; --close-hover: #C42B1C;
+  --shadow: 0 32px 64px rgba(0, 0, 0, 0.55), 0 2px 21px rgba(0, 0, 0, 0.4);
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --note-bg: rgba(20, 22, 34, 0.55);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text);
+  background-color: var(--wall-base);
+  background-image:
+    radial-gradient(60% 70% at 18% 20%, var(--wall-1) 0%, transparent 60%),
+    radial-gradient(45% 55% at 85% 15%, var(--wall-2) 0%, transparent 60%),
+    radial-gradient(50% 60% at 75% 90%, var(--wall-3) 0%, transparent 62%),
+    radial-gradient(55% 60% at 10% 95%, var(--wall-4) 0%, transparent 60%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+svg { display: block; }
+.ico { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; border-radius: 4px; }
+
+.stage { overflow-x: auto; padding-block: 40px 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.stage-inner { width: 1280px; margin: 0 auto; display: grid; gap: 20px; }
+
+/* ---------- window ---------- */
+.window {
+  width: 1280px; height: 800px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--mica);
+  -webkit-backdrop-filter: blur(70px) saturate(170%);
+  backdrop-filter: blur(70px) saturate(170%);
+  border: 1px solid var(--card-stroke);
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-rows: 48px minmax(0, 1fr);
+}
+
+/* title bar */
+.titlebar { display: grid; grid-template-columns: 272px 1fr auto; align-items: center; user-select: none; }
+.tb-brand { display: flex; align-items: center; gap: 12px; padding-left: 16px; font-size: 12px; line-height: 16px; }
+.tb-brand .logo { width: 18px; height: 18px; flex: none; }
+.tb-brand .logo svg { width: 18px; height: 18px; }
+.tb-brand b { font-weight: 600; }
+.tb-brand span { color: var(--text-3); }
+.tb-search { justify-self: center; width: 380px; height: 32px; display: flex; align-items: center; gap: 8px; padding: 0 10px 0 12px;
+  background: var(--input); border: 1px solid var(--ctrl-stroke); border-bottom-color: var(--ctrl-stroke-b); border-radius: 4px; color: var(--text-3); }
+.tb-search:hover { background: var(--ctrl-hover); }
+.tb-search input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 13px; color: var(--text); outline: none; }
+.tb-search input::placeholder { color: var(--text-3); }
+.tb-right { display: flex; align-items: stretch; height: 48px; }
+.tb-tool { align-self: center; width: 36px; height: 32px; margin-right: 6px; display: grid; place-items: center; border: 0; border-radius: 4px; background: transparent; color: var(--text-2); cursor: pointer; }
+.tb-tool:hover { background: var(--subtle-hover); color: var(--text); }
+.tb-tool:active { background: var(--subtle-press); }
+.caption { width: 46px; border: 0; background: transparent; color: var(--text); display: grid; place-items: center; cursor: default; }
+.caption svg { width: 10px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1; }
+.caption:hover { background: var(--subtle-hover); }
+.caption.close:hover { background: var(--close-hover); color: #FFFFFF; }
+
+.win-body { display: grid; grid-template-columns: 272px minmax(0, 1fr); min-height: 0; }
+
+/* ---------- navigation pane (acrylic) ---------- */
+.pane { background: var(--pane); display: flex; flex-direction: column; padding: 0 4px 6px; min-height: 0; }
+.pane-toggle { width: 40px; height: 36px; margin: 2px 0 4px 4px; border: 0; border-radius: 4px; background: transparent; display: grid; place-items: center; cursor: pointer; color: var(--text); }
+.pane-toggle:hover { background: var(--subtle-hover); }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-group { padding: 14px 12px 4px 16px; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--text-2); }
+.nav-sep { height: 1px; background: var(--divider); margin: 6px 12px 0; }
+.nav-item { position: relative; display: flex; align-items: center; gap: 14px; height: 36px; padding: 0 10px 0 16px; margin: 0 4px; border-radius: 4px;
+  color: var(--text); text-decoration: none; transition: background-color .08s linear; }
+.nav-item:hover { background: var(--subtle-hover); }
+.nav-item:active { background: var(--subtle-press); color: var(--text-2); }
+.nav-item span.lbl { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-item.is-active { background: var(--selected); }
+.nav-item.is-active::before { content: ""; position: absolute; left: 0; top: 50%; width: 3px; height: 16px; margin-top: -8px; border-radius: 2px; background: var(--accent); }
+.nav-item.is-active .ico { color: var(--accent-text); }
+.badge { min-width: 16px; height: 16px; padding: 0 5px; border-radius: 8px; font-size: 11px; line-height: 16px; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; }
+.badge-crit { background: var(--badge-bg); color: var(--badge-fg); }
+.badge-soft { background: var(--accent-soft); color: var(--accent-text); height: 18px; line-height: 18px; padding: 0 6px; border-radius: 9px; }
+.pane-foot { margin-top: auto; border-top: 1px solid var(--divider); padding-top: 6px; margin-inline: 4px; }
+.account { display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 12px; border-radius: 4px; }
+.account:hover { background: var(--subtle-hover); }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--peach); color: #1F2A6B; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: none; }
+.account .who { display: grid; line-height: 18px; }
+.account .who small { font-size: 12px; line-height: 16px; color: var(--text-3); }
+
+/* ---------- content layer ---------- */
+.layer { background: var(--layer); border-top: 1px solid var(--layer-stroke); border-left: 1px solid var(--layer-stroke); border-top-left-radius: 8px;
+  overflow: auto; padding: 20px 28px 24px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.page-head h1 { margin: 0; font-family: var(--font-display); font-size: 28px; line-height: 36px; font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; }
+.page-head p { margin: 0; color: var(--text-2); }
+.head-date { display: flex; align-items: center; gap: 8px; color: var(--text-2); font-size: 13px; }
+
+.card { background: var(--card); border: 1px solid var(--card-stroke); border-radius: 8px; box-shadow: var(--card-shadow); }
+.card-title { margin: 0; font-size: 16px; line-height: 22px; font-weight: 600; }
+.caption-txt { font-size: 12px; line-height: 16px; color: var(--text-2); }
+
+/* stat tiles */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.stat { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 12px; padding: 14px 16px; text-decoration: none; color: inherit; transition: background-color .08s linear; }
+.stat:hover { background: var(--card-hover); }
+.stat-label { font-size: 13px; color: var(--text-2); align-self: center; }
+.stat-ico { width: 32px; height: 32px; border-radius: 6px; display: grid; place-items: center; grid-row: span 2; align-self: start; }
+.stat-ico.neutral { background: var(--subtle-hover); color: var(--text-2); }
+.stat-ico.accent { background: var(--accent-soft); color: var(--accent-text); }
+.stat-ico.warn { background: var(--warn-bg); color: var(--warn); }
+.stat-ico.crit { background: var(--crit-bg); color: var(--crit); }
+.stat-ico .ico { width: 18px; height: 18px; }
+.stat-value { display: flex; align-items: baseline; gap: 8px; margin-top: 2px; }
+.stat-value b { font-family: var(--font-display); font-size: 28px; line-height: 36px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.stat-value small { font-size: 12px; color: var(--text-3); }
+.stat-value .pill { font-size: 12px; line-height: 16px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+.pill.crit { background: var(--crit-bg); color: var(--crit); }
+
+/* main grid */
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: stretch; }
+.side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 4px; cursor: pointer;
+  background: var(--ctrl); border: 1px solid var(--ctrl-stroke); border-bottom-color: var(--ctrl-stroke-b); color: var(--text); font-size: 14px; white-space: nowrap; transition: background-color .08s linear; }
+.btn:hover { background: var(--ctrl-hover); }
+.btn:active { background: var(--subtle-press); color: var(--text-2); border-bottom-color: var(--ctrl-stroke); }
+.btn.accent { background: var(--accent); color: var(--on-accent); border-color: rgba(255,255,255,0.08); border-bottom-color: rgba(0,0,0,0.3); font-weight: 600; }
+.btn.accent:hover { background: var(--accent-hover); }
+.btn.subtle { background: transparent; border-color: transparent; color: var(--accent-text); padding: 0 8px; }
+.btn.subtle:hover { background: var(--subtle-hover); }
+
+/* update card */
+.update { padding: 16px; display: grid; gap: 14px; }
+.update-row { display: flex; gap: 12px; align-items: flex-start; }
+.status-ico { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; flex: none; margin-top: 1px; }
+.status-ico.good { background: var(--good); color: var(--card); }
+.status-ico .ico { width: 12px; height: 12px; stroke-width: 2; stroke: var(--on-good, #FFFFFF); }
+:root[data-theme="dark"] .status-ico .ico { stroke: #0B1A0B; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .status-ico .ico { stroke: #0B1A0B; } }
+.update-row strong { display: block; font-weight: 600; font-variant-numeric: tabular-nums; }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* transfers */
+.transfers { padding: 16px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.total { font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.total b { font-size: 14px; color: var(--text); font-weight: 600; }
+.tr-list { display: grid; gap: 14px; }
+.tr { display: grid; gap: 6px; }
+.tr-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.tr-name { font-size: 13px; font-weight: 600; letter-spacing: 0.03em; }
+.tr-pct { font-weight: 600; font-variant-numeric: tabular-nums; }
+.meter { height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; }
+.meter i { display: block; height: 100%; border-radius: 3px; background: var(--accent); }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; color: var(--text-2); }
+.chip .dot { width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; }
+.chip .dot .ico { width: 10px; height: 10px; stroke-width: 2; }
+.chip.good .dot { background: var(--good-bg); color: var(--good); }
+.chip.warn .dot { background: var(--warn-bg); color: var(--warn); }
+.chip.crit .dot { background: var(--crit-bg); color: var(--crit); }
+.chip.warn b { color: var(--warn); font-weight: 600; }
+.chip.crit b { color: var(--crit); font-weight: 600; }
+.chip.good b { color: var(--text); font-weight: 600; }
+.tr-foot { margin-top: auto; border-top: 1px solid var(--divider); padding-top: 10px; margin-inline: -8px; }
+
+/* ABC card */
+.abc { padding: 16px 20px 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.abc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.abc-title { display: flex; align-items: center; gap: 8px; }
+.new-pill { font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 1px 7px; border-radius: 8px; background: var(--accent); color: var(--on-accent); }
+.combo { display: inline-flex; align-items: center; gap: 10px; height: 32px; padding: 0 10px 0 12px; border-radius: 4px; cursor: pointer;
+  background: var(--ctrl); border: 1px solid var(--ctrl-stroke); border-bottom-color: var(--ctrl-stroke-b); font-size: 13px; white-space: nowrap; }
+.combo:hover { background: var(--ctrl-hover); }
+.combo .ico { width: 12px; height: 12px; color: var(--text-2); }
+
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 3px; border-radius: 6px; background: var(--subtle-hover); }
+.tab { position: relative; display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 12px; border-radius: 4px; border: 1px solid transparent; background: transparent; cursor: pointer; text-align: left; color: var(--text-2); }
+.tab:hover { background: var(--subtle-hover); color: var(--text); }
+.tab[aria-selected="true"] { background: var(--card-hover); border-color: var(--card-stroke); color: var(--text); box-shadow: var(--card-shadow); }
+.tab[aria-selected="true"]::after { content: ""; position: absolute; left: 50%; bottom: 3px; width: 16px; height: 3px; margin-left: -8px; border-radius: 2px; background: var(--accent); }
+.tab-letter { width: 26px; height: 26px; border-radius: 4px; display: grid; place-items: center; font-weight: 700; font-size: 14px; background: var(--track); color: var(--text); flex: none; }
+.tab[aria-selected="true"] .tab-letter { background: var(--accent); color: var(--on-accent); }
+.tab-meta { font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tab-meta b { font-weight: 600; color: var(--text); }
+
+.share { display: flex; align-items: center; gap: 14px; }
+.share-txt { font-size: 13px; color: var(--text-2); white-space: nowrap; }
+.share-txt b { color: var(--text); font-weight: 600; }
+.share-bar { flex: 1; display: flex; gap: 2px; height: 8px; min-width: 120px; }
+.share-bar i { display: block; height: 100%; }
+.share-bar i:first-child { border-radius: 4px 0 0 4px; }
+.share-bar i:last-child { border-radius: 0 4px 4px 0; }
+.sw-a { background: var(--accent); } .sw-b { background: var(--seg-b); } .sw-c { background: var(--seg-c); }
+.share-legend { display: flex; gap: 12px; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.share-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.share-legend i { width: 8px; height: 8px; border-radius: 2px; display: block; }
+
+.tbl-wrap { overflow-x: auto; margin-inline: -8px; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; }
+th { text-align: left; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--text-2); padding: 8px 8px; border-bottom: 1px solid var(--divider); white-space: nowrap; }
+td { padding: 6px 8px; border-bottom: 1px solid var(--divider); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr { transition: background-color .08s linear; }
+tbody tr:hover td { background: var(--subtle-hover); }
+tbody tr td:first-child { border-radius: 4px 0 0 4px; }
+tbody tr td:last-child { border-radius: 0 4px 4px 0; }
+.c-num { width: 32px; color: var(--text-3); text-align: right; padding-right: 4px; }
+.c-qty { width: 60px; text-align: right; }
+.c-date { width: 112px; }
+.c-sum { width: 164px; text-align: right; }
+.drug { font-weight: 500; white-space: nowrap; }
+.date { line-height: 18px; }
+.days { display: flex; align-items: center; gap: 5px; font-size: 12px; line-height: 16px; color: var(--text-3); }
+.days i { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); display: block; }
+.days.warn { color: var(--warn); } .days.warn i { background: var(--warn); }
+.days.crit { color: var(--crit); } .days.crit i { background: var(--crit); }
+.sum { display: flex; align-items: center; justify-content: flex-end; gap: 10px; white-space: nowrap; }
+.sum small { color: var(--text-3); font-size: 12px; }
+.minibar { width: 44px; height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; flex: none; }
+.minibar i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+.abc-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid var(--divider); padding-top: 12px; margin-top: auto; }
+
+/* note under the window */
+.note { margin: 0; padding: 12px 16px; border-radius: 8px; background: var(--note-bg); border: 1px solid var(--card-stroke);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); color: var(--text); font-size: 13px; line-height: 20px; display: grid; gap: 2px; }
+.note b { font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-menu" viewBox="0 0 20 20"><path d="M3.5 5.5h13M3.5 10h13M3.5 14.5h13"/></symbol>
+    <symbol id="i-home" viewBox="0 0 20 20"><path d="M3.5 8.8 10 3.5l6.5 5.3V16a1 1 0 0 1-1 1H12v-4.5H8V17H4.5a1 1 0 0 1-1-1Z"/></symbol>
+    <symbol id="i-transfer" viewBox="0 0 20 20"><path d="M3.5 7h12.5M12.5 3.5 16 7l-3.5 3.5M16.5 13H4M7.5 9.5 4 13l3.5 3.5"/></symbol>
+    <symbol id="i-box" viewBox="0 0 20 20"><path d="M3 6.3 10 3l7 3.3v7.4L10 17l-7-3.3Z"/><path d="M3 6.3 10 9.6l7-3.3M10 9.6V17M6.5 4.6l7 3.3"/></symbol>
+    <symbol id="i-order" viewBox="0 0 20 20"><rect x="4.5" y="4" width="11" height="13.5" rx="1.5"/><path d="M7.5 4V2.5h5V4M7.5 9h5M7.5 12h5M7.5 15h3"/></symbol>
+    <symbol id="i-users" viewBox="0 0 20 20"><circle cx="8" cy="7" r="3"/><path d="M2.5 16.5c.6-2.8 2.8-4.5 5.5-4.5s4.9 1.7 5.5 4.5M12.8 4.2a3 3 0 0 1 0 5.6M14.8 12.4c1.4.7 2.3 2 2.7 4.1"/></symbol>
+    <symbol id="i-send" viewBox="0 0 20 20"><path d="M3 9.6 17 3l-4.3 14-3-5.8ZM9.7 11.2 17 3"/></symbol>
+    <symbol id="i-report" viewBox="0 0 20 20"><path d="M5.5 2.5h6L15 6v10.5a1 1 0 0 1-1 1H5.5a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1Z"/><path d="M11.5 2.5V6H15M7.3 10.5h5.4M7.3 13.5h5.4"/></symbol>
+    <symbol id="i-stats" viewBox="0 0 20 20"><path d="M3 16.5h14M5.8 13.5v-3.5M10 13.5v-8M14.2 13.5V7.5"/></symbol>
+    <symbol id="i-log" viewBox="0 0 20 20"><path d="M7.5 5.5h9M7.5 10h9M7.5 14.5h9M3.8 5.5h.5M3.8 10h.5M3.8 14.5h.5"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.2" stroke-width="2.8" stroke-dasharray="2.43 2.44" stroke-linecap="butt"/><circle cx="10" cy="10" r="4.6"/><circle cx="10" cy="10" r="1.9"/></symbol>
+    <symbol id="i-wand" viewBox="0 0 20 20"><path d="M3.5 16.5 12 8M10.6 6.6l2.8 2.8M12.5 2.8v2M16.7 7h2M15.2 4.3l1.4-1.4M15 10.2l1.4 1.4M8.8 4.3 7.4 2.9"/></symbol>
+    <symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5"/><path d="m12.3 12.3 4.2 4.2"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 20 20"><path d="M16 12.2A6.5 6.5 0 0 1 7.8 4a6.5 6.5 0 1 0 8.2 8.2Z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.3"/><path d="M10 2.5v1.6M10 15.9v1.6M2.5 10h1.6M15.9 10h1.6M4.7 4.7l1.1 1.1M14.2 14.2l1.1 1.1M4.7 15.3l1.1-1.1M14.2 5.8l1.1-1.1"/></symbol>
+    <symbol id="i-check" viewBox="0 0 20 20"><path d="m4.5 10.5 3.5 3.5 7.5-8"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 20 20"><path d="M10 5v6.5M10 15.2v.3"/></symbol>
+    <symbol id="i-x" viewBox="0 0 20 20"><path d="m5.5 5.5 9 9M14.5 5.5l-9 9"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 20 20"><path d="M16.2 10a6.2 6.2 0 1 1-1.9-4.5M16.3 3.2v3.6h-3.6"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 20 20"><path d="M12 3.2a3.9 3.9 0 0 0-3.7 5.2l-4.6 4.6a1.5 1.5 0 0 0 2.1 2.1l4.6-4.6a3.9 3.9 0 0 0 5.2-3.7l-2.4 2.4-2.3-.5-.5-2.3Z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 20 20"><path d="M10 3.5v9M6.3 8.9 10 12.6l3.7-3.7M4 16.5h12"/></symbol>
+    <symbol id="i-chev-r" viewBox="0 0 20 20"><path d="m7.5 4.5 5.5 5.5-5.5 5.5"/></symbol>
+    <symbol id="i-chev-d" viewBox="0 0 20 20"><path d="m4.5 7.5 5.5 5.5 5.5-5.5"/></symbol>
+    <symbol id="i-hourglass" viewBox="0 0 20 20"><path d="M5.5 2.8h9M5.5 17.2h9M6.5 2.8v2.6c0 2 3.5 2.9 3.5 4.6s-3.5 2.6-3.5 4.6v2.6M13.5 2.8v2.6c0 2-3.5 2.9-3.5 4.6s3.5 2.6 3.5 4.6v2.6"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 20 20"><rect x="3" y="4.5" width="14" height="12.5" rx="1.5"/><path d="M3 8.3h14M6.8 2.8v3M13.2 2.8v3M6.5 11.5h2M11.5 11.5h2M6.5 14h2"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.8"/><path d="M10 6.2V10l2.6 1.6"/></symbol>
+  </defs>
+</svg>
+
+<div class="stage">
+  <div class="stage-inner">
+
+    <div class="window" role="application" aria-label="TimeSaver">
+      <!-- title bar -->
+      <header class="titlebar">
+        <div class="tb-brand">
+          <span class="logo"><svg viewBox="-85 -85 170 170"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg></span>
+          <b>TimeSaver</b><span>Бошқарув панели</span>
+        </div>
+        <label class="tb-search" for="q">
+          <input id="q" type="search" placeholder="Дори, филиал ёки фойдаланувчини қидириш" autocomplete="off">
+          <svg class="ico"><use href="#i-search"/></svg>
+        </label>
+        <div class="tb-right">
+          <button class="tb-tool" id="themeBtn" type="button" aria-label="Қоронғи мавзуга ўтиш" title="Мавзуни алмаштириш">
+            <svg class="ico" id="themeIco"><use href="#i-moon"/></svg>
+          </button>
+          <button class="caption" type="button" aria-label="Йиғиш" title="Йиғиш"><svg viewBox="0 0 10 10"><path d="M0 5.5h10"/></svg></button>
+          <button class="caption" type="button" aria-label="Катталаштириш" title="Катталаштириш"><svg viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9" rx="1.2"/></svg></button>
+          <button class="caption close" type="button" aria-label="Ёпиш" title="Ёпиш"><svg viewBox="0 0 10 10"><path d="M0.5 0.5l9 9M9.5 0.5l-9 9"/></svg></button>
+        </div>
+      </header>
+
+      <div class="win-body">
+        <!-- navigation pane -->
+        <nav class="pane" aria-label="Асосий меню">
+          <button class="pane-toggle" type="button" aria-label="Менюни йиғиш" title="Менюни йиғиш"><svg class="ico"><use href="#i-menu"/></svg></button>
+          <div class="nav">
+            <a class="nav-item is-active" href="#" aria-current="page"><svg class="ico"><use href="#i-home"/></svg><span class="lbl">Бош саҳифа</span></a>
+            <a class="nav-item" href="#"><svg class="ico"><use href="#i-transfer"/></svg><span class="lbl">Кўчириш</span><span class="badge badge-soft">82%</span></a>
+            <a class="nav-item" href="#"><svg class="ico"><use href="#i-box"/></svg><span class="lbl">Склад</span></a>
+            <a class="nav-item" href="#"><svg class="ico"><use href="#i-order"/></svg><span class="lbl">Буюртма</span></a>
+
+            <div class="nav-sep" role="separator"></div>
+            <div class="nav-group">Мижозлар</div>
+            <a class="nav-item" href="#"><svg class="ico"><use href="#i-users"/></svg><span class="lbl">Фойдаланувчилар</span><span class="badge badge-crit" aria-label="3 та янги">3</span></a>
+            <a class="nav-item" href="#"><svg class="ico"><use href="#i-send"/></svg><span class="lbl">Хабар юбориш</span></a>
+            <a class="nav-item" href="#"><svg class="ico"><use href="#i-report"/></svg><span class="lbl">Ҳисоботлар</span></a>
+
+            <div class="nav-sep" role="separator"></div>
+            <div class="nav-group">Тизим</div>
+            <a class="nav-item" href="#"><svg class="ico"><use href="#i-stats"/></svg><span class="lbl">Статистика</span></a>
+            <a class="nav-item" href="#"><svg class="ico"><use href="#i-log"/></svg><span class="lbl">Журнал</span></a>
+            <a class="nav-item" href="#"><svg class="ico"><use href="#i-gear"/></svg><span class="lbl">Созламалар</span></a>
+            <a class="nav-item" href="#"><svg class="ico"><use href="#i-wand"/></svg><span class="lbl">Созлаш устаси</span></a>
+          </div>
+          <div class="pane-foot">
+            <div class="account">
+              <span class="avatar">МФ</span>
+              <span class="who">Намуна Фарм<small>Администратор</small></span>
+            </div>
+          </div>
+        </nav>
+
+        <!-- content -->
+        <main class="layer">
+          <div class="page-head">
+            <div>
+              <h1>Хайрли кун, Намуна Фарм</h1>
+              <p>Сешанба, 17 ноябр</p>
+            </div>
+          </div>
+
+          <!-- KPI tiles -->
+          <section class="stats" aria-label="Асосий кўрсаткичлар">
+            <a class="card stat" href="#">
+              <span class="stat-label">Срок яқин (90 кун)</span>
+              <span class="stat-ico warn"><svg class="ico"><use href="#i-hourglass"/></svg></span>
+              <span class="stat-value"><b>128</b><small>позиция</small></span>
+            </a>
+            <a class="card stat" href="#">
+              <span class="stat-label">30+ кун турган</span>
+              <span class="stat-ico neutral"><svg class="ico"><use href="#i-calendar"/></svg></span>
+              <span class="stat-value"><b>342</b><small>позиция</small></span>
+            </a>
+            <a class="card stat" href="#">
+              <span class="stat-label">Фойдаланувчилар</span>
+              <span class="stat-ico accent"><svg class="ico"><use href="#i-users"/></svg></span>
+              <span class="stat-value"><b>57</b><small>фаол</small></span>
+            </a>
+            <a class="card stat" href="#">
+              <span class="stat-label">Тасдиқ кутмоқда</span>
+              <span class="stat-ico crit"><svg class="ico"><use href="#i-clock"/></svg></span>
+              <span class="stat-value"><b>3</b><span class="pill crit">янги сўров</span></span>
+            </a>
+          </section>
+
+          <div class="grid">
+            <!-- ABC analysis (new) -->
+            <section class="card abc" aria-labelledby="abcTitle">
+              <div class="abc-head">
+                <div>
+                  <div class="abc-title"><h2 class="card-title" id="abcTitle">Срок · ABC таҳлил</h2><span class="new-pill">Янги</span></div>
+                  <div class="caption-txt">Муддати 90 кун ичида тугайдиган дорилар, пул бўйича</div>
+                </div>
+                <button class="combo" type="button">Барча филиаллар<svg class="ico"><use href="#i-chev-d"/></svg></button>
+              </div>
+
+              <div class="tabs" role="tablist" aria-label="ABC гуруҳлари">
+                <button class="tab" role="tab" aria-selected="true" type="button"><span class="tab-letter">A</span><span class="tab-meta"><b>20 та</b> · 42,6 млн</span></button>
+                <button class="tab" role="tab" aria-selected="false" type="button"><span class="tab-letter">B</span><span class="tab-meta"><b>31 та</b> · 8,0 млн</span></button>
+                <button class="tab" role="tab" aria-selected="false" type="button"><span class="tab-letter">C</span><span class="tab-meta"><b>77 та</b> · 2,7 млн</span></button>
+              </div>
+
+              <div class="share">
+                <span class="share-txt"><b>A</b> — жами пулнинг <b>80%</b> и</span>
+                <div class="share-bar" role="img" aria-label="Пул улуши: A 80%, B 15%, C 5%">
+                  <i class="sw-a" style="width:80%" title="A · 42,6 млн сўм · 80%"></i>
+                  <i class="sw-b" style="width:15%" title="B · 8,0 млн сўм · 15%"></i>
+                  <i class="sw-c" style="width:5%" title="C · 2,7 млн сўм · 5%"></i>
+                </div>
+                <span class="share-legend">
+                  <span><i class="sw-a"></i>A 80%</span>
+                  <span><i class="sw-b"></i>B 15%</span>
+                  <span><i class="sw-c"></i>C 5%</span>
+                </span>
+              </div>
+
+              <div class="tbl-wrap">
+                <table>
+                  <thead>
+                    <tr><th class="c-num">#</th><th>Дори</th><th class="c-date">Муддат</th><th class="c-qty">Қолдиқ</th><th class="c-sum">Сумма</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="c-num">1</td><td class="drug">Аугментин 625мг №14</td>
+                      <td class="c-date"><div class="date">12.01.2027</div><div class="days warn"><i></i>56 кун қолди</div></td>
+                      <td class="c-qty">46</td>
+                      <td class="c-sum"><div class="sum"><span class="minibar"><i style="width:100%"></i></span>8 740 000 <small>сўм</small></div></td>
+                    </tr>
+                    <tr>
+                      <td class="c-num">2</td><td class="drug">Эссенциале форте №30</td>
+                      <td class="c-date"><div class="date">28.12.2026</div><div class="days warn"><i></i>41 кун қолди</div></td>
+                      <td class="c-qty">38</td>
+                      <td class="c-sum"><div class="sum"><span class="minibar"><i style="width:71.7%"></i></span>6 270 000 <small>сўм</small></div></td>
+                    </tr>
+                    <tr>
+                      <td class="c-num">3</td><td class="drug">Нурофен 200мг №24</td>
+                      <td class="c-date"><div class="date">03.02.2027</div><div class="days"><i></i>78 кун қолди</div></td>
+                      <td class="c-qty">120</td>
+                      <td class="c-sum"><div class="sum"><span class="minibar"><i style="width:46.7%"></i></span>4 080 000 <small>сўм</small></div></td>
+                    </tr>
+                    <tr>
+                      <td class="c-num">4</td><td class="drug">Линекс №16</td>
+                      <td class="c-date"><div class="date">19.01.2027</div><div class="days"><i></i>63 кун қолди</div></td>
+                      <td class="c-qty">54</td>
+                      <td class="c-sum"><div class="sum"><span class="minibar"><i style="width:40.2%"></i></span>3 510 000 <small>сўм</small></div></td>
+                    </tr>
+                    <tr>
+                      <td class="c-num">5</td><td class="drug">Цитрамон П №10</td>
+                      <td class="c-date"><div class="date">07.12.2026</div><div class="days crit"><i></i>20 кун қолди</div></td>
+                      <td class="c-qty">300</td>
+                      <td class="c-sum"><div class="sum"><span class="minibar"><i style="width:18.9%"></i></span>1 650 000 <small>сўм</small></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="abc-foot">
+                <span class="caption-txt">5 та кўрсатилди · 20 тадан</span>
+                <button class="btn" type="button"><svg class="ico"><use href="#i-download"/></svg>Яна 15 та · Excel'да юклаб олиш</button>
+              </div>
+            </section>
+
+            <div class="side">
+              <!-- data update status -->
+              <section class="card update" aria-label="Маълумот ҳолати">
+                <div class="update-row">
+                  <span class="status-ico good"><svg class="ico"><use href="#i-check"/></svg></span>
+                  <div>
+                    <strong>Маълумот янгиланди · бугун 08:42</strong>
+                    <span class="caption-txt">Excel базадаги қолдиқлар, барча филиаллар бўйича</span>
+                  </div>
+                </div>
+                <div class="btn-row">
+                  <button class="btn accent" type="button"><svg class="ico"><use href="#i-refresh"/></svg>Янгилаш</button>
+                  <button class="btn" type="button"><svg class="ico"><use href="#i-wrench"/></svg>Техник режим</button>
+                </div>
+              </section>
+
+              <!-- today's transfers -->
+              <section class="card transfers" aria-labelledby="trTitle">
+                <div class="card-head">
+                  <h2 class="card-title" id="trTitle">Бугунги кўчириш</h2>
+                  <span class="total">жами <b>82%</b></span>
+                </div>
+                <div class="tr-list">
+                  <div class="tr" title="ДОРИХОНА ЧИНОЗ · 92% бажарилди · 0 кечикди">
+                    <div class="tr-top"><span class="tr-name">ДОРИХОНА ЧИНОЗ</span><span class="tr-pct">92%</span></div>
+                    <div class="meter" role="meter" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100" aria-label="ДОРИХОНА ЧИНОЗ"><i style="width:92%"></i></div>
+                    <span class="chip good"><span class="dot"><svg class="ico"><use href="#i-check"/></svg></span><b>0</b> кечикди</span>
+                  </div>
+                  <div class="tr" title="ДОРИХОНА УРГУТ · 76% бажарилди · 2 кечикди">
+                    <div class="tr-top"><span class="tr-name">ДОРИХОНА УРГУТ</span><span class="tr-pct">76%</span></div>
+                    <div class="meter" role="meter" aria-valuenow="76" aria-valuemin="0" aria-valuemax="100" aria-label="ДОРИХОНА УРГУТ"><i style="width:76%"></i></div>
+                    <span class="chip warn"><span class="dot"><svg class="ico"><use href="#i-alert"/></svg></span><b>2</b> кечикди</span>
+                  </div>
+                  <div class="tr" title="ДОРИХОНА ЭРКИН · 64% бажарилди · 4 кечикди">
+                    <div class="tr-top"><span class="tr-name">ДОРИХОНА ЭРКИН</span><span class="tr-pct">64%</span></div>
+                    <div class="meter" role="meter" aria-valuenow="64" aria-valuemin="0" aria-valuemax="100" aria-label="ДОРИХОНА ЭРКИН"><i style="width:64%"></i></div>
+                    <span class="chip crit"><span class="dot"><svg class="ico"><use href="#i-x"/></svg></span><b>4</b> кечикди</span>
+                  </div>
+                </div>
+                <div class="tr-foot">
+                  <button class="btn subtle" type="button">Барча кўчиришлар<svg class="ico"><use href="#i-chev-r"/></svg></button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <p class="note">
+      <span><b>Вариант 2 «Ойна».</b> Дастур Виндовс 11 нинг ўз иловаларидек кўринади: ойна орқасидаги фон рангини олган шаффоф сирт, хира ойнали меню, тизим тугмалари ва шрифти.</span>
+      <span><b>Кимга мос:</b> кун бўйи компьютерда ишлайдиган, Виндовс интерфейсига ўрганган дорихона эгалари ва менежерлари.</span>
+      <span><b>Кучли томони:</b> ўрганиш шарт эмас, панель тизимнинг бир қисмидек туюлади; ёруғ ва қоронғи мавзу тизим билан бир хил ишлайди.</span>
+    </p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement, KEY = 'timesaver-theme';
+  var btn = document.getElementById('themeBtn');
+  var use = document.querySelector('#themeIco use');
+  try {
+    var saved = localStorage.getItem(KEY);
+    if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+  } catch (e) {}
+  function current() {
+    var t = root.getAttribute('data-theme');
+    if (t) return t;
+    return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function sync() {
+    var dark = current() === 'dark';
+    use.setAttribute('href', dark ? '#i-sun' : '#i-moon');
+    btn.setAttribute('aria-label', dark ? 'Ёруғ мавзуга ўтиш' : 'Қоронғи мавзуга ўтиш');
+  }
+  btn.addEventListener('click', function () {
+    var next = current() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+    sync();
+  });
+  if (window.matchMedia) {
+    try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', sync); } catch (e) {}
+  }
+  sync();
+})();
+</script>
+</body>
+</html>

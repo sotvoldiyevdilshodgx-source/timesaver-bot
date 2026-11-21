@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TimeSaver бот — ШАБЛОН</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== Telegram ko'rinishi: umumiy uslub (o'zgartirmang, faqat nusxa oling) ===== */
+:root{
+  --page:#ECEAE3;--page-tx:#1E1D2B;--page-mute:#62679A;
+  --chat:#D5E0C9;--in:#FFFFFF;--in-tx:#0F1419;--out:#E1FFC8;--out-tx:#0F1419;--meta:#8A9AA9;--link:#2E7BC4;
+  --head:#FFFFFF;--head-tx:#0F1419;--head-sub:#7B8B99;
+  --ib:rgba(80,110,70,.38);--ib-tx:#FFFFFF;--ib-danger:#E5484D;--ib-success:#2E9E5B;--ib-primary:#1F2A6B;
+  --kb:#F1F2F4;--kb-btn:#FFFFFF;--kb-tx:#0F1419;--kb-line:#D9DCE1;
+  --q:#2E7BC4;--q-bg:rgba(46,123,196,.08);--code:#C7334A;--sep:#E3E6EA;
+  --frame:#11163A;
+}
+:root[data-theme="dark"]{
+  --page:#0B0E22;--page-tx:#EEF0FB;--page-mute:#8C93C2;
+  --chat:#0E1621;--in:#182533;--in-tx:#F5F7FA;--out:#2B5278;--out-tx:#F5F7FA;--meta:#6D8299;--link:#6AB2F2;
+  --head:#17212B;--head-tx:#F5F7FA;--head-sub:#6D8299;
+  --ib:rgba(46,62,82,.92);--ib-tx:#F5F7FA;--ib-danger:#C9353B;--ib-success:#23804A;--ib-primary:#3A4BB0;
+  --kb:#17212B;--kb-btn:#232E3C;--kb-tx:#F5F7FA;--kb-line:#0E1621;
+  --q:#6AB2F2;--q-bg:rgba(106,178,242,.10);--code:#F07A8C;--sep:#22303F;
+  --frame:#000000;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--page-tx);font-family:"Onest",-apple-system,"Segoe UI",Roboto,sans-serif}
+.top{max-width:1400px;margin:0 auto;padding:22px 16px 6px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top h1{font-size:22px;font-weight:700;margin:0;flex:1}
+.top p{margin:4px 0 0;color:var(--page-mute);font-size:14px;width:100%}
+.theme{height:34px;padding:0 14px;border-radius:9px;border:1px solid var(--sep);background:var(--head);color:var(--head-tx);font:inherit;font-size:13px;cursor:pointer}
+.screens{max-width:1400px;margin:0 auto;padding:12px 16px 40px;display:flex;flex-wrap:wrap;gap:26px;justify-content:center}
+.screen{width:360px;display:flex;flex-direction:column;gap:10px}
+.cap{font-size:14px;color:var(--page-tx);font-weight:600}
+.cap span{display:block;font-weight:400;color:var(--page-mute);font-size:13px;margin-top:2px}
+/* telefon */
+.phone{width:360px;height:740px;border-radius:38px;background:var(--frame);padding:10px;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.scr{width:100%;height:100%;border-radius:30px;overflow:hidden;display:flex;flex-direction:column;background:var(--chat);font-size:14.5px;line-height:1.38}
+.tg-head{background:var(--head);display:flex;align-items:center;gap:10px;padding:30px 12px 9px;border-bottom:1px solid var(--sep)}
+.tg-head .back{color:var(--link);font-size:20px;width:18px}
+.tg-head .ava{width:38px;height:38px;border-radius:50%;flex:none;display:block}
+.tg-head .nm{flex:1;min-width:0}.tg-head .nm b{display:block;font-size:15.5px;color:var(--head-tx);font-weight:600}
+.tg-head .nm span{font-size:12.5px;color:var(--head-sub)}
+.chat{flex:1;overflow:hidden;padding:10px 8px 8px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
+.day{align-self:center;background:rgba(0,0,0,.18);color:#fff;font-size:12px;padding:2px 10px;border-radius:12px;margin:2px 0 4px}
+.msg{max-width:92%;background:var(--in);color:var(--in-tx);border-radius:14px 14px 14px 4px;padding:7px 10px 6px;align-self:flex-start;position:relative}
+.msg.out{background:var(--out);color:var(--out-tx);border-radius:14px 14px 4px 14px;align-self:flex-end}
+.msg .t{float:right;font-size:11px;color:var(--meta);margin:6px 0 -2px 10px}
+.msg b{font-weight:600}.msg i{font-style:italic}
+.msg code{font-family:ui-monospace,Consolas,monospace;font-size:13px;color:var(--code)}
+.msg .q{border-left:3px solid var(--q);background:var(--q-bg);border-radius:4px;padding:4px 8px;margin:4px 0}
+.msg .muted{color:var(--meta)}
+.msg .row{display:flex;justify-content:space-between;gap:10px}
+.msg .num{font-variant-numeric:tabular-nums}
+.wrap{display:flex;flex-direction:column;gap:3px;align-self:flex-start;max-width:92%}
+.wrap .msg{max-width:100%}
+.ikb{display:flex;flex-direction:column;gap:3px}
+.ikb .r{display:flex;gap:3px}
+.ib{flex:1;min-width:0;background:var(--ib);color:var(--ib-tx);border-radius:9px;padding:8px 6px;text-align:center;font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib.danger{background:var(--ib-danger)}.ib.success{background:var(--ib-success)}.ib.primary{background:var(--ib-primary)}
+.doc{display:flex;gap:10px;align-items:center;margin:2px 0 4px}
+.doc .fi{width:44px;height:44px;border-radius:50%;background:#2E9E5B;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+.doc b{display:block;font-size:14px}.doc span{font-size:12.5px;color:var(--meta)}
+.rkb{background:var(--kb);padding:6px 6px 16px;display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--sep)}
+.rkb .r{display:flex;gap:5px}
+.kb{flex:1;min-width:0;background:var(--kb-btn);color:var(--kb-tx);border-radius:8px;padding:10px 4px;text-align:center;font-size:13.5px;font-weight:500;box-shadow:0 1px 0 var(--kb-line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kb.danger{background:var(--ib-danger);color:#fff}.kb.success{background:var(--ib-success);color:#fff}.kb.primary{background:var(--ib-primary);color:#fff}
+.input{background:var(--head);display:flex;align-items:center;gap:8px;padding:8px 12px 18px;border-top:1px solid var(--sep);color:var(--meta);font-size:14px}
+.input .pl{flex:1}
+.notes{max-width:1400px;margin:0 auto;padding:0 16px 40px;color:var(--page-mute);font-size:14px;line-height:1.6}
+.notes b{color:var(--page-tx)}
+</style>
+<script>try{var t=localStorage.getItem("tsbot-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="top"><h1>TimeSaver бот · ШАБЛОН</h1>
+  <button class="theme" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('tsbot-theme',r.dataset.theme)}catch(e){}">Кун / Тун</button>
+  <p>Изоҳ: ҳар бир телефон — битта экран.</p></div>
+<div class="screens">
+
+  <!-- ЭКРАН НАМУНАСИ: шундан нусха олинг -->
+  <div class="screen">
+    <div class="cap">1. Экран номи<span>Қисқа изоҳ: фойдаланувчи нима қилди, бот нима кўрсатди.</span></div>
+    <div class="phone"><div class="scr">
+      <div class="tg-head"><span class="back">‹</span>
+        <svg class="ava" viewBox="-85 -85 170 170"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+        <div class="nm"><b>TimeSaver</b><span>бот</span></div></div>
+      <div class="chat">
+        <div class="day">Бугун</div>
+        <div class="msg out">⏰ Срок<span class="t">09:12</span></div>
+        <div class="wrap">
+          <div class="msg"><b>Сарлавҳа</b><br>Матн…<span class="t">09:12</span></div>
+          <div class="ikb"><div class="r"><div class="ib primary">Тугма</div><div class="ib">Тугма</div></div></div>
+        </div>
+      </div>
+      <div class="rkb"><div class="r"><div class="kb">Пастки тугма</div><div class="kb">Пастки тугма</div></div></div>
+    </div></div>
+  </div>
+
+</div>
+<div class="notes"><b>Тамойиллар:</b> …</div>
+</body>
+</html>

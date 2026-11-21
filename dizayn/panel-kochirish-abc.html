@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="uz-Cyrl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TimeSaver — Кўчириш · ABC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap">
+<script>
+  // Тема: аввал сақланган танлов, бўлмаса тизим созламаси
+  (function () {
+    try {
+      var t = localStorage.getItem('ts-theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+</script>
+<style>
+/* Layout: оғир ойна — тор тўқ навигация + 2 қаторли буйруқ панели (ҳолат+рақамлар, кейин кўчириш | ABC). */
+:root {
+  color-scheme: dark;
+  /* Ранг — тун (асосий) */
+  --page: #070A1E;
+  --win: #0E1333;
+  --side: #0A0F2A;
+  --surface: #141A42;
+  --surface-2: #1B2254;
+  --line: #252D63;
+  --line-soft: #1D2453;
+  --hi: rgba(255,255,255,.035);
+  --fg: #EEF0FB;
+  --fg-2: #B3B8DA;
+  --fg-3: #8C93C2;
+  --accent: #D4F06A;
+  --accent-ink: #D4F06A;
+  --on-accent: #11163A;
+  --accent-soft: rgba(212,240,106,.11);
+  --accent-line: rgba(212,240,106,.38);
+  --ring: #D4F06A;
+  --ring-track: #232B5E;
+  --warn: #FF9E7A;
+  --warn-ink: #FF9E7A;
+  --warn-soft: rgba(255,158,122,.13);
+  --good-ink: #7FE0A8;
+  --good-soft: rgba(127,224,168,.12);
+  --danger: #FF6B78;
+  --on-danger: #11163A;
+  --close-hover: #C42B1C;
+  --shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 24px 60px -24px rgba(0,0,0,.6);
+  --focus: #D4F06A;
+
+  /* Шрифт */
+  --font-ui: "Onest", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --fs-xs: 11.5px;
+  --fs-s: 12.5px;
+  --fs-m: 13.5px;
+  --fs-l: 15px;
+  --fs-h: 22px;
+  --fs-num: 34px;
+  --r-s: 6px;
+  --r-m: 10px;
+  --r-l: 14px;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --page: #E7E5DD;
+    --win: #F7F6F1;
+    --side: #EFEDE6;
+    --surface: #FFFFFF;
+    --surface-2: #F1F0EA;
+    --line: #E0DED4;
+    --line-soft: #EAE8E0;
+    --hi: rgba(255,255,255,0);
+    --fg: #11163A;
+    --fg-2: #41477A;
+    --fg-3: #62679A;
+    --accent: #D4F06A;
+    --accent-ink: #4D6400;
+    --on-accent: #11163A;
+    --accent-soft: #EEF8C9;
+    --accent-line: #B9D64A;
+    --ring: #1F2A6B;
+    --ring-track: #E7E6DE;
+    --warn: #FF9E7A;
+    --warn-ink: #B0441C;
+    --warn-soft: #FFEDE5;
+    --good-ink: #1C7445;
+    --good-soft: #E3F4EA;
+    --danger: #D7263D;
+    --on-danger: #FFFFFF;
+    --close-hover: #C42B1C;
+    --shadow: 0 1px 2px rgba(17,22,58,.06), 0 24px 56px -28px rgba(17,22,58,.28);
+    --focus: #1F2A6B;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --page: #E7E5DD;
+  --win: #F7F6F1;
+  --side: #EFEDE6;
+  --surface: #FFFFFF;
+  --surface-2: #F1F0EA;
+  --line: #E0DED4;
+  --line-soft: #EAE8E0;
+  --hi: rgba(255,255,255,0);
+  --fg: #11163A;
+  --fg-2: #41477A;
+  --fg-3: #62679A;
+  --accent: #D4F06A;
+  --accent-ink: #4D6400;
+  --on-accent: #11163A;
+  --accent-soft: #EEF8C9;
+  --accent-line: #B9D64A;
+  --ring: #1F2A6B;
+  --ring-track: #E7E6DE;
+  --warn: #FF9E7A;
+  --warn-ink: #B0441C;
+  --warn-soft: #FFEDE5;
+  --good-ink: #1C7445;
+  --good-soft: #E3F4EA;
+  --danger: #D7263D;
+  --on-danger: #FFFFFF;
+  --close-hover: #C42B1C;
+  --shadow: 0 1px 2px rgba(17,22,58,.06), 0 24px 56px -28px rgba(17,22,58,.28);
+  --focus: #1F2A6B;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--page);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: var(--fs-m);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+.num, td, .badge, .tab-meta { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Саҳна */
+.stage {
+  min-height: 100vh;
+  padding-block: 40px 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  overflow-x: auto;
+}
+
+/* Ойна */
+.window {
+  width: 1280px; height: 800px; flex: none;
+  display: grid; grid-template-rows: 40px 1fr;
+  background: var(--win);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.titlebar {
+  display: flex; align-items: center;
+  background: var(--side);
+  border-bottom: 1px solid var(--line-soft);
+  user-select: none;
+}
+.tb-brand { display: flex; align-items: center; gap: 9px; padding-left: 14px; flex: 1; min-width: 0; }
+.tb-brand svg { width: 18px; height: 18px; }
+.tb-brand b { font-weight: 600; font-size: var(--fs-s); letter-spacing: .01em; }
+.tb-brand span { color: var(--fg-3); font-size: var(--fs-s); }
+.tb-tools { display: flex; align-items: center; height: 100%; }
+.theme-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 28px; padding: 0 10px; margin-right: 8px;
+  background: transparent; border: 1px solid var(--line); border-radius: 7px;
+  color: var(--fg-2); font-size: var(--fs-xs); font-weight: 500; cursor: pointer;
+}
+.theme-btn:hover { background: var(--surface-2); color: var(--fg); }
+.theme-btn svg.i { width: 15px; height: 15px; }
+.theme-btn .sun { display: none; }
+.is-light .theme-btn .sun { display: block; }
+.is-light .theme-btn .moon { display: none; }
+.wbtn {
+  width: 46px; height: 40px; display: grid; place-items: center;
+  background: transparent; border: 0; color: var(--fg-2); cursor: default;
+}
+.wbtn:hover { background: var(--surface-2); color: var(--fg); }
+.wbtn.close:hover { background: var(--close-hover); color: #FFFFFF; }
+.wbtn svg { width: 10px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1; }
+
+.body { display: grid; grid-template-columns: 236px 1fr; min-height: 0; }
+
+/* Навигация */
+.nav {
+  background: var(--side);
+  border-right: 1px solid var(--line-soft);
+  display: flex; flex-direction: column;
+  padding: 14px 12px 12px;
+  min-height: 0;
+}
+.nav-group { display: flex; flex-direction: column; gap: 2px; }
+.nav-group + .nav-group { margin-top: 18px; }
+.nav-label {
+  font-size: 10.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--fg-3); padding: 0 10px 6px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 11px;
+  height: 36px; padding: 0 10px;
+  border-radius: 8px; border: 1px solid transparent;
+  color: var(--fg-2); text-decoration: none; font-weight: 500; font-size: var(--fs-m);
+  cursor: pointer;
+}
+.nav-item:hover { background: var(--surface); color: var(--fg); }
+.nav-item .grow { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-item.active { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent-ink); font-weight: 600; }
+.is-light .nav-item.active { background: var(--accent); border-color: var(--accent-line); color: var(--on-accent); }
+.badge {
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px;
+  display: inline-grid; place-items: center;
+  font-size: 11px; font-weight: 600; line-height: 1;
+}
+.badge.red { background: var(--danger); color: var(--on-danger); }
+.badge.soft { background: var(--surface-2); color: var(--fg-2); border: 1px solid var(--line); }
+.nav-foot {
+  margin-top: auto;
+  border: 1px solid var(--line); border-radius: var(--r-m);
+  background: var(--surface);
+  padding: 10px; display: grid; grid-template-columns: 34px 1fr; gap: 2px 10px; align-items: center;
+}
+.avatar {
+  grid-row: span 2; width: 34px; height: 34px; border-radius: 9px;
+  background: #1F2A6B; color: #D4F06A; display: grid; place-items: center;
+  font-size: 12px; font-weight: 700; letter-spacing: .02em;
+}
+.nav-foot b { font-size: var(--fs-s); font-weight: 600; }
+.nav-foot small { font-size: var(--fs-xs); color: var(--fg-3); display: flex; align-items: center; gap: 6px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good-ink); flex: none; }
+
+/* Асосий майдон */
+.main { overflow: auto; padding: 20px 24px 20px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.eyebrow { font-size: var(--fs-xs); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-3); }
+h1 { margin: 4px 0 0; font-size: var(--fs-h); font-weight: 600; letter-spacing: -.01em; text-wrap: balance; }
+.head-meta { display: flex; gap: 8px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 11px;
+  border-radius: 14px; border: 1px solid var(--line); background: var(--surface);
+  font-size: var(--fs-s); color: var(--fg-2); font-weight: 500;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  box-shadow: inset 0 1px 0 var(--hi);
+  min-width: 0;
+}
+.row-a { display: grid; grid-template-columns: 332px 1fr; gap: 16px; }
+.row-b { display: grid; grid-template-columns: 332px 1fr; gap: 16px; align-items: stretch; }
+
+/* Янгилаш ҳолати */
+.sync { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+.sync-top { display: flex; align-items: center; gap: 14px; }
+.ring { position: relative; flex: none; }
+.ring > svg { display: block; transform: rotate(-90deg); }
+.ring .track { stroke: var(--ring-track); fill: none; }
+.ring .val { stroke: var(--ring); fill: none; stroke-linecap: round; }
+.ring .center { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ring); }
+.sync-time { font-size: var(--fs-num); font-weight: 600; letter-spacing: -.02em; line-height: 1; }
+.sync-text { margin-top: 6px; color: var(--fg-2); font-size: var(--fs-s); white-space: nowrap; }
+.sync-text b { color: var(--fg); font-weight: 600; }
+.actions { display: flex; gap: 10px; }
+.btn {
+  height: 38px; padding: 0 14px; border-radius: 9px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: var(--fs-m); font-weight: 600; cursor: pointer; white-space: nowrap;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--fg);
+}
+.btn:hover { border-color: var(--fg-3); }
+.btn.primary { flex: 1; background: var(--accent); color: var(--on-accent); border-color: var(--accent-line); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn svg.i { width: 16px; height: 16px; }
+
+/* Кўрсаткичлар */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.stat {
+  padding: 14px 14px 15px; display: flex; flex-direction: column; gap: 10px; cursor: pointer;
+  transition: border-color .15s;
+}
+.stat:hover { border-color: var(--fg-3); }
+.stat-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ico {
+  width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center;
+  background: var(--surface-2); color: var(--fg-2); border: 1px solid var(--line-soft);
+}
+.ico svg.i { width: 16px; height: 16px; }
+.ico.warn { background: var(--warn-soft); color: var(--warn-ink); border-color: transparent; }
+.stat-label { font-size: var(--fs-s); color: var(--fg-2); font-weight: 500; min-height: 2.8em; }
+.stat-num { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+.stat-num b { font-size: var(--fs-num); font-weight: 600; letter-spacing: -.02em; line-height: 1; }
+.stat-num span { font-size: var(--fs-s); color: var(--fg-3); white-space: nowrap; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px;
+  border-radius: 11px; font-size: 11.5px; font-weight: 600; white-space: nowrap;
+}
+.chip svg.i { width: 12px; height: 12px; stroke-width: 2; }
+.chip.warn { background: var(--warn-soft); color: var(--warn-ink); }
+.chip.good { background: var(--good-soft); color: var(--good-ink); }
+.chip.neutral { background: var(--surface-2); color: var(--fg-2); }
+.chip.new { background: var(--accent); color: var(--on-accent); letter-spacing: .04em; text-transform: uppercase; font-size: 10.5px; height: 20px; }
+
+/* Карта сарлавҳаси */
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 16px 18px 0; }
+.card-title { display: flex; align-items: center; gap: 8px; font-size: var(--fs-l); font-weight: 600; margin: 0; }
+.card-sub { margin-top: 3px; font-size: var(--fs-s); color: var(--fg-3); }
+.link {
+  display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 8px;
+  color: var(--fg-2); font-size: var(--fs-s); font-weight: 600; background: transparent; border: 1px solid transparent; cursor: pointer;
+}
+.link:hover { background: var(--surface-2); color: var(--fg); }
+.link svg.i { width: 15px; height: 15px; }
+
+/* Кўчириш */
+.move { display: flex; flex-direction: column; }
+.move-total { margin: 12px 18px 2px; padding: 12px 14px; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); }
+.mt-row { display: flex; align-items: baseline; justify-content: space-between; }
+.mt-row span { font-size: var(--fs-s); color: var(--fg-2); }
+.mt-row b { font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+.bar { height: 6px; border-radius: 3px; background: var(--ring-track); margin-top: 9px; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 3px; background: var(--ring); }
+.branches { list-style: none; margin: 0; padding: 6px 8px; display: flex; flex-direction: column; flex: 1; }
+.branch {
+  display: grid; grid-template-columns: 54px 1fr 16px; align-items: center; gap: 14px;
+  padding: 10px; border-radius: var(--r-m); cursor: pointer;
+}
+.branch + .branch { border-top: 1px solid var(--line-soft); }
+.branch:hover { background: var(--surface-2); }
+.branch:hover + .branch { border-top-color: transparent; }
+.branch .center { font-size: 13px; font-weight: 600; color: var(--fg); }
+.br-name { font-size: var(--fs-m); font-weight: 600; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.br-meta { margin-top: 5px; display: flex; gap: 8px; align-items: center; }
+.br-meta small { font-size: var(--fs-xs); color: var(--fg-3); }
+.chev { color: var(--fg-3); width: 16px; height: 16px; }
+.card-foot { padding: 4px 10px 12px; }
+
+/* ABC */
+.abc { display: flex; flex-direction: column; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px 18px 0; }
+.tab {
+  text-align: left; cursor: pointer;
+  padding: 10px 12px 11px; border-radius: var(--r-m);
+  background: transparent; border: 1px solid var(--line);
+  display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center;
+}
+.tab:hover { background: var(--surface-2); }
+.tab-letter {
+  grid-row: span 2; width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center;
+  font-size: 15px; font-weight: 700; background: var(--surface-2); color: var(--fg-2);
+}
+.tab-meta { font-size: var(--fs-s); font-weight: 600; color: var(--fg); white-space: nowrap; }
+.tab-share { display: flex; align-items: center; gap: 8px; }
+.tab-share .bar { flex: 1; margin: 0; height: 4px; }
+.tab-share small { font-size: var(--fs-xs); color: var(--fg-3); width: 28px; text-align: right; font-variant-numeric: tabular-nums; }
+.tab[aria-selected="true"] { border-color: var(--accent-line); background: var(--accent-soft); }
+.tab[aria-selected="true"] .tab-letter { background: var(--accent); color: var(--on-accent); }
+
+.tbl-wrap { padding: 8px 10px 0; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--fg-3);
+  text-align: left; padding: 10px 10px 8px; border-bottom: 1px solid var(--line);
+}
+td { padding: 0 10px; height: 41px; border-bottom: 1px solid var(--line-soft); font-size: var(--fs-m); white-space: nowrap; }
+tbody tr { cursor: pointer; }
+tbody tr:hover td { background: var(--surface-2); }
+tbody tr:hover td:first-child { border-radius: 8px 0 0 8px; }
+tbody tr:hover td:last-child { border-radius: 0 8px 8px 0; }
+tbody tr:last-child td { border-bottom: 0; }
+.c-n { width: 34px; color: var(--fg-3); }
+.c-name { font-weight: 500; }
+.c-date { width: 156px; }
+.c-date .d { display: inline-block; width: 86px; }
+.c-qty { width: 72px; text-align: right; }
+.c-sum { width: 196px; text-align: right; }
+.sum { display: inline-flex; align-items: center; gap: 10px; justify-content: flex-end; }
+.sum .bar { width: 48px; margin: 0; height: 4px; }
+.sum b { font-weight: 600; min-width: 64px; }
+.sum em { font-style: normal; color: var(--fg-3); font-size: var(--fs-s); }
+th.c-qty, th.c-sum { text-align: right; }
+
+.abc-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 18px 14px; border-top: 1px solid var(--line-soft); margin-top: 6px; }
+.abc-foot small { font-size: var(--fs-s); color: var(--fg-3); }
+.btn.excel { height: 34px; font-size: var(--fs-s); }
+
+/* Изоҳ */
+.note {
+  width: 1280px; max-width: 100%;
+  color: var(--fg-2); font-size: var(--fs-m); line-height: 1.55;
+  display: grid; grid-template-columns: 160px 1fr; gap: 4px 20px;
+}
+.note dt { color: var(--fg-3); font-size: var(--fs-xs); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding-top: 3px; }
+.note dd { margin: 0; max-width: 78ch; }
+.note dd b { color: var(--fg); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Кўрсаткичлар (3 + 6: тренд чизиқлари) */
+.stat { gap: 8px; justify-content: space-between; }
+.stat-top { align-items: center; min-height: 0; }
+.stat-top .stat-label { min-height: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 7px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; flex: none; display: inline-block; }
+.dot.warn { background: var(--warn); }
+.stat-hint { font-size: 11.5px; color: var(--fg-3); white-space: nowrap; }
+.dot.crit { background: var(--danger); }
+.delta.crit { color: var(--danger); }
+.stat .spark { width: 100%; height: 36px; display: block; overflow: visible; }
+.stat-foot { font-size: var(--fs-s); color: var(--fg-3); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.delta { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--fg-2); }
+.delta.up-good, .delta.down-good { color: var(--accent-ink); }
+.delta.up-bad { color: var(--warn-ink); }
+.stat.alert { border-color: color-mix(in srgb, var(--danger) 55%, var(--line)); }
+.stat.alert:hover { border-color: var(--danger); }
+
+/* ===== Кўчириш · ABC саҳифаси ===== */
+.main.kc { gap: 12px; }
+.kc .head { align-items: flex-end; }
+.head-tools { display: flex; align-items: center; gap: 8px; }
+.seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); }
+.seg button {
+  height: 28px; padding: 0 13px; border-radius: 7px; border: 1px solid transparent;
+  background: transparent; color: var(--fg-2); font-size: var(--fs-s); font-weight: 600; cursor: pointer;
+}
+.seg button:hover { color: var(--fg); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent-ink); }
+.is-light .seg button[aria-pressed="true"] { background: var(--surface); border-color: var(--line); color: var(--fg); box-shadow: 0 1px 2px rgba(17,22,58,.08); }
+.btn.sm { height: 36px; padding: 0 13px; font-size: var(--fs-s); }
+.btn.primary.sm { flex: none; }
+.hint {
+  display: flex; align-items: center; gap: 8px; margin-top: -2px;
+  font-size: var(--fs-s); color: var(--fg-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hint svg.i { width: 15px; height: 15px; }
+.hint b { color: var(--fg-2); font-weight: 600; }
+
+/* Юқори қатор: A/B/C + матрица */
+.top { display: grid; grid-template-columns: repeat(3, 1fr) 384px; gap: 12px; flex: none; }
+.grp { padding: 14px 14px 13px; display: flex; flex-direction: column; justify-content: space-between; gap: 9px; }
+.grp.a { border-color: var(--accent-line); }
+.grp-top { display: flex; align-items: center; gap: 10px; }
+.letter {
+  width: 38px; height: 38px; border-radius: 9px; flex: none;
+  display: grid; place-items: center; font-size: 18px; font-weight: 700; line-height: 1;
+  background: var(--surface-2); color: var(--fg-2); border: 1px solid var(--line-soft);
+}
+.letter.a { background: var(--accent); color: var(--on-accent); border-color: var(--accent-line); }
+.letter.sm { width: 24px; height: 24px; border-radius: 6px; font-size: 12.5px; }
+.grp-sum { min-width: 0; }
+.grp-sum b { display: block; font-size: 19px; font-weight: 600; letter-spacing: -.01em; line-height: 1.15; white-space: nowrap; }
+.grp-sum small { font-size: var(--fs-xs); color: var(--fg-3); white-space: nowrap; }
+.grp-top .chip { margin-left: auto; align-self: flex-start; }
+.pct-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.pct-row b { font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-height: 1; }
+.pct-row span { font-size: var(--fs-xs); color: var(--fg-3); white-space: nowrap; }
+.split { display: flex; gap: 2px; height: 8px; }
+.split i { display: block; height: 100%; border-radius: 3px; min-width: 4px; }
+.split .ok { background: var(--ring); }
+.split .no { background: var(--warn); }
+.lgd { display: flex; flex-direction: column; gap: 4px; }
+.lg { display: flex; align-items: center; gap: 7px; font-size: var(--fs-s); color: var(--fg-2); white-space: nowrap; height: 22px; padding: 0 6px; margin: 0 -6px; border-radius: 6px; }
+.lg .sw { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.lg .sw.ok { background: var(--ring); }
+.lg .sw.no { background: var(--warn); }
+.lg svg.i { width: 13px; height: 13px; stroke-width: 2.2; }
+.lg .ic-ok { color: var(--good-ink); }
+.lg .ic-no { color: var(--warn-ink); }
+.lg b { color: var(--fg); font-weight: 600; }
+.lg em { font-style: normal; margin-left: auto; color: var(--fg-2); }
+.lg.hot { background: var(--warn-soft); color: var(--warn-ink); }
+.lg.hot b, .lg.hot em { color: var(--warn-ink); }
+
+/* Матрица */
+.mx { display: flex; flex-direction: column; }
+.mx .card-head { padding: 13px 16px 0; align-items: baseline; }
+.mx .card-sub { margin: 0; font-size: var(--fs-xs); }
+.mx-tbl { width: 100%; border-collapse: collapse; margin-top: 6px; table-layout: fixed; }
+.mx-tbl th { padding: 5px 4px 5px; font-size: 10.5px; text-align: center; }
+.mx-tbl th:first-child { text-align: left; padding-left: 16px; width: 150px; }
+.mx-tbl th:last-child, .mx-tbl td:last-child { border-left: 1px solid var(--line-soft); }
+.mx-tbl td { height: 27px; padding: 0 4px; font-size: var(--fs-s); text-align: center; }
+.mx-tbl td.br { text-align: left; padding-left: 16px; font-size: 11px; font-weight: 600; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; }
+.mx-tbl tbody tr:hover td { background: transparent; }
+.mx-tbl tbody tr:hover td:first-child, .mx-tbl tbody tr:hover td:last-child { border-radius: 0; }
+.mx-tbl tbody tr { cursor: default; }
+.mx-tbl tr.tot td { border-top: 1px solid var(--line); border-bottom: 0; }
+.mx-tbl tr.tot td.br { color: var(--fg-2); letter-spacing: .06em; text-transform: uppercase; font-size: 10.5px; }
+.cell { display: inline-flex; flex-direction: column; gap: 3px; width: 46px; vertical-align: middle; cursor: default; }
+.cell b { font-weight: 600; font-size: 12px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; gap: 3px; }
+.cell .bar { height: 3px; margin: 0; }
+.cell.low b { color: var(--danger); }
+.cell.low .bar i { background: var(--danger); }
+.cell svg.i { width: 11px; height: 11px; stroke-width: 2.4; }
+.tot .cell b { font-weight: 700; }
+
+/* Икки рўйхат */
+.lists { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; min-height: 0; }
+.col { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.col-head { display: flex; align-items: center; gap: 11px; padding: 11px 16px 10px; border-bottom: 1px solid var(--line-soft); flex: none; }
+.ico.good { background: var(--good-soft); color: var(--good-ink); border-color: transparent; }
+.ico svg.i.b { stroke-width: 2.2; }
+.col-title { margin: 0; font-size: var(--fs-l); font-weight: 600; line-height: 1.2; }
+.col-sub { font-size: var(--fs-xs); color: var(--fg-3); }
+.col-total { margin-left: auto; text-align: right; white-space: nowrap; }
+.col-total b { display: block; font-size: var(--fs-l); font-weight: 600; }
+.col-total small { font-size: var(--fs-xs); color: var(--fg-3); }
+.col-body {
+  flex: 1; min-height: 0; overflow-y: auto; padding: 4px 8px 10px;
+  scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+}
+.sec + .sec { margin-top: 8px; }
+.sec-head {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; align-items: center; gap: 9px; padding: 8px 8px 6px;
+  background: var(--surface);
+}
+.sec-head .t { font-size: var(--fs-m); font-weight: 600; }
+.sec-head .m { margin-left: auto; font-size: var(--fs-s); color: var(--fg-2); white-space: nowrap; }
+.sec-head .m b { color: var(--fg); font-weight: 600; }
+.rows { list-style: none; margin: 0; padding: 0; }
+.r {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 3px 12px;
+  padding: 7px 8px; border-radius: 8px; cursor: pointer;
+}
+.r + .r { border-top: 1px solid var(--line-soft); }
+.r:hover { background: var(--surface-2); }
+.r:hover + .r { border-top-color: transparent; }
+.r-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.r-sum { justify-self: end; font-weight: 600; white-space: nowrap; }
+.r-sum em { font-style: normal; font-weight: 500; color: var(--fg-3); font-size: var(--fs-xs); margin-left: 4px; }
+.r-route { display: flex; align-items: center; gap: 5px; min-width: 0; font-size: var(--fs-xs); color: var(--fg-3); white-space: nowrap; overflow: hidden; letter-spacing: .01em; }
+.r-route svg.i { width: 12px; height: 12px; flex: none; }
+.r-route .q { color: var(--fg-2); font-weight: 600; letter-spacing: 0; }
+.r-route .sep { opacity: .6; }
+.r .chip { justify-self: end; height: 20px; font-size: 11px; padding: 0 7px; }
+.chip.crit { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); }
+.more {
+  display: inline-flex; align-items: center; gap: 4px; height: 26px; margin: 2px 0 0 8px; padding: 0 6px; border-radius: 6px;
+  background: transparent; border: 0; color: var(--fg-2); font-size: var(--fs-s); font-weight: 600; cursor: pointer;
+}
+.more:hover { background: var(--surface-2); color: var(--fg); }
+.more svg.i { width: 14px; height: 14px; }
+
+/* Бажарилмаган A — энг муҳим */
+.sec.hot {
+  --hot-bg: color-mix(in srgb, var(--warn) 12%, var(--surface));
+  background: var(--hot-bg);
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--line));
+  border-radius: var(--r-m);
+  padding: 0 4px 4px;
+  margin-top: 4px;
+}
+.sec.hot .sec-head { background: var(--hot-bg); border-radius: var(--r-m) var(--r-m) 0 0; padding-top: 9px; }
+.sec.hot .r { box-shadow: inset 3px 0 0 var(--danger); border-radius: 0 8px 8px 0; padding-left: 12px; }
+.sec.hot .r + .r { border-top-color: color-mix(in srgb, var(--danger) 18%, transparent); }
+.sec.hot .r:hover { background: color-mix(in srgb, var(--warn) 18%, var(--surface)); }
+.sec.hot .r-name { font-weight: 600; }
+.chip.flag { background: var(--danger); color: var(--on-danger); height: 20px; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; }
+.lg .w { color: var(--fg-3); font-size: var(--fs-xs); }
+.lg.hot .w { color: var(--warn-ink); }
+.r-sum .q { color: var(--fg-3); font-weight: 500; font-size: var(--fs-xs); margin-right: 10px; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9v10h4.5v-5h3v5H18V9"/></symbol>
+    <symbol id="i-move" viewBox="0 0 24 24"><path d="M4 8h13"/><path d="m14 4.5 3.5 3.5L14 11.5"/><path d="M20 16H7"/><path d="m10 12.5-3.5 3.5 3.5 3.5"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5z"/><path d="M4 7.5 12 11l8-3.5"/><path d="M12 11v9"/></symbol>
+    <symbol id="i-order" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 4v2h6V4"/><path d="M8.5 11h7M8.5 15h4.5"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><path d="M15.5 5.6a3 3 0 0 1 0 5.8"/><path d="M17.2 14.4c1.8.5 3 2 3.3 4.6"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M20 4 4 10.5l6.5 2.5L13 19.5z"/><path d="m10.5 13 4.5-4.5"/></symbol>
+    <symbol id="i-report" viewBox="0 0 24 24"><path d="M14 4H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M14 4v5h5"/><path d="M9 16v-3M12 16v-5M15 16v-2"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></symbol>
+    <symbol id="i-log" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" stroke-width="2.4"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4 18 18M6 18l1.6-1.6M16.4 7.6 18 6"/></symbol>
+    <symbol id="i-wand" viewBox="0 0 24 24"><path d="m4 20 11-11"/><path d="m13 7 2-2 4 4-2 2"/><path d="M18 3v2M21 6h-2M7 4v2M8 5H6M19 15v2M20 16h-2"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 0 1-13 5.1"/><path d="M4.5 12a7.5 7.5 0 0 1 13-5.1"/><path d="M17.5 3.5v3.4h-3.4"/><path d="M6.5 20.5v-3.4h3.4"/></symbol>
+    <symbol id="i-tool" viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0 4.8 4.8L20 12l-8 8-3.5-3.5 8-8"/><path d="M14.5 6.5 16 5l3 3-1.5 1.5"/><path d="m4 20 4.5-4.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 3 19.5h18z"/><path d="M12 10v4.2M12 17h.01"/></symbol>
+    <symbol id="i-hour" viewBox="0 0 24 24"><path d="M7 4h10M7 20h10"/><path d="M8 4c0 4 8 4 8 8s-8 4-8 8M16 4c0 4-8 4-8 8"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M10 9.5v5M14 9.5v5"/></symbol>
+    <symbol id="i-user-check" viewBox="0 0 24 24"><circle cx="10" cy="8.5" r="3.2"/><path d="M4.5 19c.6-3 2.8-4.8 5.5-4.8 1.3 0 2.5.4 3.4 1.1"/><path d="m15 18 2 2 4-4"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13.5 6.5 19 12l-5.5 5.5"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M5 19.5h14"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 2H5z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/></symbol>
+    <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="m6.4 6.4 11.2 11.2"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 11v5M12 8h.01"/></symbol>
+  </defs>
+</svg>
+
+<div class="stage">
+  <div class="window" role="application" aria-label="TimeSaver ойнаси">
+
+    <!-- Сарлавҳа сатри -->
+    <header class="titlebar">
+      <div class="tb-brand">
+        <svg viewBox="-85 -85 170 170" aria-hidden="true"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+        <b>TimeSaver</b>
+        <span>· Бошқарув панели</span>
+      </div>
+      <div class="tb-tools">
+        <button class="theme-btn" id="theme-toggle" type="button" aria-label="Мавзуни алмаштириш">
+          <svg class="i moon"><use href="#i-moon"/></svg>
+          <svg class="i sun"><use href="#i-sun"/></svg>
+          <span id="theme-label">Тун</span>
+        </button>
+        <button class="wbtn" type="button" aria-label="Йиғиш"><svg viewBox="0 0 10 10"><path d="M0 5.5h10"/></svg></button>
+        <button class="wbtn" type="button" aria-label="Катталаштириш"><svg viewBox="0 0 10 10"><rect x=".5" y=".5" width="9" height="9" rx="1"/></svg></button>
+        <button class="wbtn close" type="button" aria-label="Ёпиш"><svg viewBox="0 0 10 10"><path d="M.5.5l9 9M9.5.5l-9 9"/></svg></button>
+      </div>
+    </header>
+
+    <div class="body">
+      <!-- Навигация -->
+      <nav class="nav" aria-label="Асосий меню">
+        <div class="nav-group">
+          <a class="nav-item"><svg class="i"><use href="#i-home"/></svg><span class="grow">Бош саҳифа</span></a>
+          <a class="nav-item active" aria-current="page"><svg class="i"><use href="#i-move"/></svg><span class="grow">Кўчириш</span><span class="badge soft">82%</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-box"/></svg><span class="grow">Склад</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-order"/></svg><span class="grow">Буюртма</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">Мижозлар</div>
+          <a class="nav-item"><svg class="i"><use href="#i-users"/></svg><span class="grow">Фойдаланувчилар</span><span class="badge red">3</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-send"/></svg><span class="grow">Хабар юбориш</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-report"/></svg><span class="grow">Ҳисоботлар</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">Тизим</div>
+          <a class="nav-item"><svg class="i"><use href="#i-chart"/></svg><span class="grow">Статистика</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-log"/></svg><span class="grow">Журнал</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-gear"/></svg><span class="grow">Созламалар</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-wand"/></svg><span class="grow">Созлаш устаси</span></a>
+        </div>
+        <div class="nav-foot">
+          <div class="avatar">МФ</div>
+          <b>Намуна Фарм</b>
+          <small><span class="dot"></span>Бот ва сервер онлайн</small>
+        </div>
+      </nav>
+
+      <!-- Кўчириш · ABC -->
+      <main class="main kc">
+        <div class="head">
+          <div>
+            <div class="eyebrow">Сешанба, 17 ноябрь · <span class="num">146 та вазифа · 21,8 млн сўм</span></div>
+            <h1>Кўчириш · ABC</h1>
+          </div>
+          <div class="head-tools">
+            <div class="seg" role="group" aria-label="Давр">
+              <button type="button" aria-pressed="true">Бугун</button>
+              <button type="button" aria-pressed="false">Кеча</button>
+              <button type="button" aria-pressed="false">7 кун</button>
+            </div>
+            <button class="btn sm" type="button"><svg class="i"><use href="#i-download"/></svg>Excel</button>
+            <button class="btn primary sm" type="button" title="Бажарилмаган вазифалар бўйича филиалларга эслатма юбориш"><svg class="i"><use href="#i-bell"/></svg>Эслатма</button>
+          </div>
+        </div>
+        <div class="hint"><svg class="i"><use href="#i-info"/></svg><span>Бутун тармоқ, сумма = сон × кирим нархи: <b>A</b> — жами сумманинг 80% и (энг қимматлари), <b>B</b> — кейинги 15%, <b>C</b> — қолган 5% · фоиз — вазифалар сони бўйича</span></div>
+
+        <section class="top">
+          <article class="card grp a" aria-label="A гуруҳи">
+            <div class="grp-top">
+              <span class="letter a">A</span>
+              <div class="grp-sum"><b class="num">17,4 млн</b><small class="num" title="Жами сумманинг улуши">18 та · улуши 80%</small></div>
+            </div>
+            <div class="pct-row" title="Вазифалар сони бўйича: 18 тадан 15 таси"><b class="num">83%</b><span>бажарилди</span></div>
+            <div class="split" role="img" aria-label="18 тадан 15 таси бажарилди, 3 таси бажарилмади"><i class="ok" style="flex:15"></i><i class="no" style="flex:3"></i></div>
+            <div class="lgd">
+              <div class="lg" title="Бажарилди: берилди ёки олинди"><span class="sw ok"></span><svg class="i ic-ok"><use href="#i-check"/></svg><b class="num">15 та</b><em class="num">14,9 млн</em></div>
+              <div class="lg hot" title="Бажарилмади: янги, ёпилди ёки рад"><span class="sw no"></span><svg class="i ic-no"><use href="#i-x"/></svg><b class="num">3 та</b><em class="num">2,5 млн</em></div>
+            </div>
+          </article>
+          <article class="card grp" aria-label="B гуруҳи">
+            <div class="grp-top">
+              <span class="letter">B</span>
+              <div class="grp-sum"><b class="num">3,3 млн</b><small class="num" title="Жами сумманинг улуши">37 та · улуши 15%</small></div>
+            </div>
+            <div class="pct-row" title="Вазифалар сони бўйича: 37 тадан 29 таси"><b class="num">78%</b><span>бажарилди</span></div>
+            <div class="split" role="img" aria-label="37 тадан 29 таси бажарилди, 8 таси бажарилмади"><i class="ok" style="flex:29"></i><i class="no" style="flex:8"></i></div>
+            <div class="lgd">
+              <div class="lg" title="Бажарилди: берилди ёки олинди"><span class="sw ok"></span><svg class="i ic-ok"><use href="#i-check"/></svg><b class="num">29 та</b><em class="num">2,7 млн</em></div>
+              <div class="lg" title="Бажарилмади: янги, ёпилди ёки рад"><span class="sw no"></span><svg class="i ic-no"><use href="#i-x"/></svg><b class="num">8 та</b><em class="num">0,6 млн</em></div>
+            </div>
+          </article>
+          <article class="card grp" aria-label="C гуруҳи">
+            <div class="grp-top">
+              <span class="letter">C</span>
+              <div class="grp-sum"><b class="num">1,1 млн</b><small class="num" title="Жами сумманинг улуши">91 та · улуши 5%</small></div>
+            </div>
+            <div class="pct-row" title="Вазифалар сони бўйича: 91 тадан 76 таси"><b class="num">84%</b><span>бажарилди</span></div>
+            <div class="split" role="img" aria-label="91 тадан 76 таси бажарилди, 15 таси бажарилмади"><i class="ok" style="flex:76"></i><i class="no" style="flex:15"></i></div>
+            <div class="lgd">
+              <div class="lg" title="Бажарилди: берилди ёки олинди"><span class="sw ok"></span><svg class="i ic-ok"><use href="#i-check"/></svg><b class="num">76 та</b><em class="num">0,9 млн</em></div>
+              <div class="lg" title="Бажарилмади: янги, ёпилди ёки рад"><span class="sw no"></span><svg class="i ic-no"><use href="#i-x"/></svg><b class="num">15 та</b><em class="num">0,2 млн</em></div>
+            </div>
+          </article>
+
+          <!-- Филиаллар бўйича -->
+          <article class="card mx">
+            <div class="card-head">
+              <h2 class="card-title">Филиаллар бўйича</h2>
+              <div class="card-sub">бажарилди / жами</div>
+            </div>
+            <table class="mx-tbl">
+              <thead><tr><th>Берувчи филиал</th><th>A</th><th>B</th><th>C</th><th>Жами</th></tr></thead>
+              <tbody>
+                <tr><td class="br" title="ДОРИХОНА ЧИНОЗ">ДОРИХОНА ЧИНОЗ</td><td><span class="cell" title="ДОРИХОНА ЧИНОЗ · A: 4 тадан 4 таси бажарилди (100%)"><b class="num">4/4</b><span class="bar"><i style="width:100%"></i></span></span></td><td><span class="cell" title="ДОРИХОНА ЧИНОЗ · B: 10 тадан 9 таси бажарилди (90%)"><b class="num">9/10</b><span class="bar"><i style="width:90%"></i></span></span></td><td><span class="cell" title="ДОРИХОНА ЧИНОЗ · C: 26 тадан 24 таси бажарилди (92%)"><b class="num">24/26</b><span class="bar"><i style="width:92%"></i></span></span></td><td><span class="cell" title="ДОРИХОНА ЧИНОЗ · жами: 40 тадан 37 таси бажарилди (93%)"><b class="num">37/40</b><span class="bar"><i style="width:93%"></i></span></span></td></tr>
+                <tr><td class="br" title="ДОРИХОНА УРГУТ">ДОРИХОНА УРГУТ</td><td><span class="cell" title="ДОРИХОНА УРГУТ · A: 4 тадан 3 таси бажарилди (75%)"><b class="num">3/4</b><span class="bar"><i style="width:75%"></i></span></span></td><td><span class="cell" title="ДОРИХОНА УРГУТ · B: 9 тадан 7 таси бажарилди (78%)"><b class="num">7/9</b><span class="bar"><i style="width:78%"></i></span></span></td><td><span class="cell" title="ДОРИХОНА УРГУТ · C: 23 тадан 19 таси бажарилди (83%)"><b class="num">19/23</b><span class="bar"><i style="width:83%"></i></span></span></td><td><span class="cell" title="ДОРИХОНА УРГУТ · жами: 36 тадан 29 таси бажарилди (81%)"><b class="num">29/36</b><span class="bar"><i style="width:81%"></i></span></span></td></tr>
+                <tr><td class="br" title="ДОРИХОНА ЭРКИН">ДОРИХОНА ЭРКИН</td><td><span class="cell low" title="ДОРИХОНА ЭРКИН · A: 4 тадан 2 таси бажарилди (50%)"><b class="num"><svg class="i"><use href="#i-alert"/></svg>2/4</b><span class="bar"><i style="width:50%"></i></span></span></td><td><span class="cell low" title="ДОРИХОНА ЭРКИН · B: 8 тадан 4 таси бажарилди (50%)"><b class="num"><svg class="i"><use href="#i-alert"/></svg>4/8</b><span class="bar"><i style="width:50%"></i></span></span></td><td><span class="cell" title="ДОРИХОНА ЭРКИН · C: 18 тадан 13 таси бажарилди (72%)"><b class="num">13/18</b><span class="bar"><i style="width:72%"></i></span></span></td><td><span class="cell low" title="ДОРИХОНА ЭРКИН · жами: 30 тадан 19 таси бажарилди (63%)"><b class="num"><svg class="i"><use href="#i-alert"/></svg>19/30</b><span class="bar"><i style="width:63%"></i></span></span></td></tr>
+                <tr><td class="br" title="СКЛАД">СКЛАД</td><td><span class="cell" title="СКЛАД · A: 6 тадан 6 таси бажарилди (100%)"><b class="num">6/6</b><span class="bar"><i style="width:100%"></i></span></span></td><td><span class="cell" title="СКЛАД · B: 10 тадан 9 таси бажарилди (90%)"><b class="num">9/10</b><span class="bar"><i style="width:90%"></i></span></span></td><td><span class="cell" title="СКЛАД · C: 24 тадан 20 таси бажарилди (83%)"><b class="num">20/24</b><span class="bar"><i style="width:83%"></i></span></span></td><td><span class="cell" title="СКЛАД · жами: 40 тадан 35 таси бажарилди (88%)"><b class="num">35/40</b><span class="bar"><i style="width:88%"></i></span></span></td></tr>
+                <tr class="tot"><td class="br" title="Жами">Жами</td><td><span class="cell" title="Жами · A: 18 тадан 15 таси бажарилди (83%)"><b class="num">15/18</b><span class="bar"><i style="width:83%"></i></span></span></td><td><span class="cell" title="Жами · B: 37 тадан 29 таси бажарилди (78%)"><b class="num">29/37</b><span class="bar"><i style="width:78%"></i></span></span></td><td><span class="cell" title="Жами · C: 91 тадан 76 таси бажарилди (84%)"><b class="num">76/91</b><span class="bar"><i style="width:84%"></i></span></span></td><td><span class="cell" title="Жами · жами: 146 тадан 120 таси бажарилди (82%)"><b class="num">120/146</b><span class="bar"><i style="width:82%"></i></span></span></td></tr>
+              </tbody>
+            </table>
+          </article>
+        </section>
+
+        <section class="lists">
+          <!-- Бажарилганлар -->
+          <div class="card col">
+            <div class="col-head">
+              <span class="ico good"><svg class="i b"><use href="#i-check"/></svg></span>
+              <div>
+                <h2 class="col-title">Бажарилганлар</h2>
+                <div class="col-sub">берилди ёки олинди</div>
+              </div>
+              <div class="col-total"><b class="num">120 та</b><small class="num">18,5 млн сўм</small></div>
+            </div>
+            <div class="col-body">
+            <section class="sec" aria-label="A гуруҳи">
+              <div class="sec-head"><span class="letter sm a">A</span><span class="t">A гуруҳи</span><span class="m num"><b>15 та</b> · 14,9 млн</span></div>
+              <ul class="rows">
+                <li class="r" title="Аугментин 625мг №14 · 20 × 98 000 сўм">
+                  <span class="r-name">Аугментин 625мг №14</span><span class="r-sum num"><span class="q">20 дона</span>1 960 000<em>сўм</em></span>
+                  <span class="r-route">СКЛАД<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЧИНОЗ</span>
+                  <span class="chip good" title="Олувчи филиал қабул қилди"><svg class="i"><use href="#i-check"/></svg>олинди 09:14</span>
+                </li>
+                <li class="r" title="Эссенциале форте №30 · 12 × 142 000 сўм">
+                  <span class="r-name">Эссенциале форте №30</span><span class="r-sum num"><span class="q">12 дона</span>1 704 000<em>сўм</em></span>
+                  <span class="r-route">СКЛАД<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА УРГУТ</span>
+                  <span class="chip good" title="Олувчи филиал қабул қилди"><svg class="i"><use href="#i-check"/></svg>олинди 10:02</span>
+                </li>
+                <li class="r" title="Мексидол 125мг №30 · 12 × 118 000 сўм">
+                  <span class="r-name">Мексидол 125мг №30</span><span class="r-sum num"><span class="q">12 дона</span>1 416 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЧИНОЗ<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЭРКИН</span>
+                  <span class="chip neutral" title="Берувчи филиал жўнатди"><svg class="i"><use href="#i-box"/></svg>берилди 08:55</span>
+                </li>
+                <li class="r" title="Флемоксин солютаб 500мг №20 · 15 × 86 000 сўм">
+                  <span class="r-name">Флемоксин солютаб 500мг №20</span><span class="r-sum num"><span class="q">15 дона</span>1 290 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА УРГУТ<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЧИНОЗ</span>
+                  <span class="chip good" title="Олувчи филиал қабул қилди"><svg class="i"><use href="#i-check"/></svg>олинди 11:37</span>
+                </li>
+                <li class="r" title="Арбидол 100мг №20 · 12 × 96 000 сўм">
+                  <span class="r-name">Арбидол 100мг №20</span><span class="r-sum num"><span class="q">12 дона</span>1 152 000<em>сўм</em></span>
+                  <span class="r-route">СКЛАД<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЭРКИН</span>
+                  <span class="chip neutral" title="Берувчи филиал жўнатди"><svg class="i"><use href="#i-box"/></svg>берилди 14:20</span>
+                </li>
+              </ul>
+              <button class="more" type="button">яна 10 та<svg class="i"><use href="#i-chev"/></svg></button>
+            </section>
+            <section class="sec" aria-label="B гуруҳи">
+              <div class="sec-head"><span class="letter sm">B</span><span class="t">B гуруҳи</span><span class="m num"><b>29 та</b> · 2,7 млн</span></div>
+              <ul class="rows">
+                <li class="r" title="Кардиомагнил 75мг №100 · 4 × 64 000 сўм">
+                  <span class="r-name">Кардиомагнил 75мг №100</span><span class="r-sum num"><span class="q">4 дона</span>256 000<em>сўм</em></span>
+                  <span class="r-route">СКЛАД<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЧИНОЗ</span>
+                  <span class="chip good" title="Олувчи филиал қабул қилди"><svg class="i"><use href="#i-check"/></svg>олинди 09:31</span>
+                </li>
+                <li class="r" title="Линекс №16 · 3 × 72 000 сўм">
+                  <span class="r-name">Линекс №16</span><span class="r-sum num"><span class="q">3 дона</span>216 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЧИНОЗ<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА УРГУТ</span>
+                  <span class="chip good" title="Олувчи филиал қабул қилди"><svg class="i"><use href="#i-check"/></svg>олинди 10:15</span>
+                </li>
+                <li class="r" title="Терафлю №10 · 3 × 58 000 сўм">
+                  <span class="r-name">Терафлю №10</span><span class="r-sum num"><span class="q">3 дона</span>174 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЭРКИН<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЧИНОЗ</span>
+                  <span class="chip neutral" title="Берувчи филиал жўнатди"><svg class="i"><use href="#i-box"/></svg>берилди 09:05</span>
+                </li>
+                <li class="r" title="Нурофен 200мг №24 · 4 × 38 000 сўм">
+                  <span class="r-name">Нурофен 200мг №24</span><span class="r-sum num"><span class="q">4 дона</span>152 000<em>сўм</em></span>
+                  <span class="r-route">СКЛАД<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЭРКИН</span>
+                  <span class="chip good" title="Олувчи филиал қабул қилди"><svg class="i"><use href="#i-check"/></svg>олинди 11:48</span>
+                </li>
+                <li class="r" title="Но-шпа 40мг №24 · 4 × 32 000 сўм">
+                  <span class="r-name">Но-шпа 40мг №24</span><span class="r-sum num"><span class="q">4 дона</span>128 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА УРГУТ<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЭРКИН</span>
+                  <span class="chip good" title="Олувчи филиал қабул қилди"><svg class="i"><use href="#i-check"/></svg>олинди 12:10</span>
+                </li>
+              </ul>
+              <button class="more" type="button">яна 24 та<svg class="i"><use href="#i-chev"/></svg></button>
+            </section>
+            <section class="sec" aria-label="C гуруҳи">
+              <div class="sec-head"><span class="letter sm">C</span><span class="t">C гуруҳи</span><span class="m num"><b>76 та</b> · 0,9 млн</span></div>
+              <ul class="rows">
+                <li class="r" title="Но-шпа 40мг №24 · 1 × 32 000 сўм">
+                  <span class="r-name">Но-шпа 40мг №24</span><span class="r-sum num"><span class="q">1 дона</span>32 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЧИНОЗ<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА УРГУТ</span>
+                  <span class="chip neutral" title="Берувчи филиал жўнатди"><svg class="i"><use href="#i-box"/></svg>берилди 10:40</span>
+                </li>
+                <li class="r" title="Мезим форте №20 · 1 × 29 000 сўм">
+                  <span class="r-name">Мезим форте №20</span><span class="r-sum num"><span class="q">1 дона</span>29 000<em>сўм</em></span>
+                  <span class="r-route">СКЛАД<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЭРКИН</span>
+                  <span class="chip good" title="Олувчи филиал қабул қилди"><svg class="i"><use href="#i-check"/></svg>олинди 09:22</span>
+                </li>
+                <li class="r" title="Цитрамон П №10 · 5 × 5 500 сўм">
+                  <span class="r-name">Цитрамон П №10</span><span class="r-sum num"><span class="q">5 дона</span>27 500<em>сўм</em></span>
+                  <span class="r-route">СКЛАД<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЧИНОЗ</span>
+                  <span class="chip good" title="Олувчи филиал қабул қилди"><svg class="i"><use href="#i-check"/></svg>олинди 11:05</span>
+                </li>
+                <li class="r" title="Цитрамон П №10 · 3 × 5 500 сўм">
+                  <span class="r-name">Цитрамон П №10</span><span class="r-sum num"><span class="q">3 дона</span>16 500<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА УРГУТ<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЭРКИН</span>
+                  <span class="chip good" title="Олувчи филиал қабул қилди"><svg class="i"><use href="#i-check"/></svg>олинди 12:30</span>
+                </li>
+                <li class="r" title="Цитрамон П №10 · 2 × 5 500 сўм">
+                  <span class="r-name">Цитрамон П №10</span><span class="r-sum num"><span class="q">2 дона</span>11 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЭРКИН<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЧИНОЗ</span>
+                  <span class="chip good" title="Олувчи филиал қабул қилди"><svg class="i"><use href="#i-check"/></svg>олинди 13:12</span>
+                </li>
+              </ul>
+              <button class="more" type="button">яна 71 та<svg class="i"><use href="#i-chev"/></svg></button>
+            </section>
+            </div>
+          </div>
+
+          <!-- Бажарилмаганлар -->
+          <div class="card col">
+            <div class="col-head">
+              <span class="ico warn"><svg class="i b"><use href="#i-x"/></svg></span>
+              <div>
+                <h2 class="col-title">Бажарилмаганлар</h2>
+                <div class="col-sub">ҳали янги, кун охирида ёпилди ёки рад этилди</div>
+              </div>
+              <div class="col-total"><b class="num">26 та</b><small class="num">3,3 млн сўм</small></div>
+            </div>
+            <div class="col-body">
+            <section class="sec hot" aria-label="A гуруҳи">
+              <div class="sec-head"><span class="letter sm a">A</span><span class="t">A гуруҳи</span><span class="chip flag">Муҳим</span><span class="m num"><b>3 та</b> · 2,5 млн</span></div>
+              <ul class="rows">
+                <li class="r" title="Эссенциале форте №30 · 8 × 142 000 сўм">
+                  <span class="r-name">Эссенциале форте №30</span><span class="r-sum num"><span class="q">8 дона</span>1 136 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЭРКИН<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЧИНОЗ</span>
+                  <span class="chip warn" title="Ҳали бажарилмаган, муддатдан ўтди"><svg class="i"><use href="#i-clock"/></svg>янги · 1 соат кечикди</span>
+                </li>
+                <li class="r" title="Мексидол 125мг №30 · 6 × 118 000 сўм">
+                  <span class="r-name">Мексидол 125мг №30</span><span class="r-sum num"><span class="q">6 дона</span>708 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЭРКИН<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА УРГУТ</span>
+                  <span class="chip crit" title="Берувчи филиал рад этди"><svg class="i"><use href="#i-ban"/></svg>рад: «қолдиқ йўқ»</span>
+                </li>
+                <li class="r" title="Арбидол 100мг №20 · 7 × 96 000 сўм">
+                  <span class="r-name">Арбидол 100мг №20</span><span class="r-sum num"><span class="q">7 дона</span>672 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА УРГУТ<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЭРКИН</span>
+                  <span class="chip neutral" title="Кун охирида бажарилмасдан ёпилди"><svg class="i"><use href="#i-lock"/></svg>ёпилди</span>
+                </li>
+              </ul>
+            </section>
+            <section class="sec" aria-label="B гуруҳи">
+              <div class="sec-head"><span class="letter sm">B</span><span class="t">B гуруҳи</span><span class="m num"><b>8 та</b> · 0,6 млн</span></div>
+              <ul class="rows">
+                <li class="r" title="Линекс №16 · 2 × 72 000 сўм">
+                  <span class="r-name">Линекс №16</span><span class="r-sum num"><span class="q">2 дона</span>144 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЭРКИН<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА УРГУТ</span>
+                  <span class="chip warn" title="Ҳали бажарилмаган, муддатдан ўтди"><svg class="i"><use href="#i-clock"/></svg>янги · 3 соат кечикди</span>
+                </li>
+                <li class="r" title="Мезим форте №20 · 3 × 29 000 сўм">
+                  <span class="r-name">Мезим форте №20</span><span class="r-sum num"><span class="q">3 дона</span>87 000<em>сўм</em></span>
+                  <span class="r-route">СКЛАД<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЧИНОЗ</span>
+                  <span class="chip neutral" title="Кун охирида бажарилмасдан ёпилди"><svg class="i"><use href="#i-lock"/></svg>ёпилди</span>
+                </li>
+                <li class="r" title="Флемоксин солютаб 500мг №20 · 1 × 86 000 сўм">
+                  <span class="r-name">Флемоксин солютаб 500мг №20</span><span class="r-sum num"><span class="q">1 дона</span>86 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА УРГУТ<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЧИНОЗ</span>
+                  <span class="chip crit" title="Берувчи филиал рад этди"><svg class="i"><use href="#i-ban"/></svg>рад: «қолдиқ йўқ»</span>
+                </li>
+                <li class="r" title="Нурофен 200мг №24 · 2 × 38 000 сўм">
+                  <span class="r-name">Нурофен 200мг №24</span><span class="r-sum num"><span class="q">2 дона</span>76 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЭРКИН<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЧИНОЗ</span>
+                  <span class="chip warn" title="Ҳали бажарилмаган, муддатдан ўтди"><svg class="i"><use href="#i-clock"/></svg>янги · 40 дақ кечикди</span>
+                </li>
+                <li class="r" title="Терафлю №10 · 1 × 58 000 сўм">
+                  <span class="r-name">Терафлю №10</span><span class="r-sum num"><span class="q">1 дона</span>58 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЧИНОЗ<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЭРКИН</span>
+                  <span class="chip warn" title="Ҳали бажарилмаган, муддатдан ўтди"><svg class="i"><use href="#i-clock"/></svg>янги · 20 дақ кечикди</span>
+                </li>
+              </ul>
+              <button class="more" type="button">яна 3 та<svg class="i"><use href="#i-chev"/></svg></button>
+            </section>
+            <section class="sec" aria-label="C гуруҳи">
+              <div class="sec-head"><span class="letter sm">C</span><span class="t">C гуруҳи</span><span class="m num"><b>15 та</b> · 0,2 млн</span></div>
+              <ul class="rows">
+                <li class="r" title="Но-шпа 40мг №24 · 1 × 32 000 сўм">
+                  <span class="r-name">Но-шпа 40мг №24</span><span class="r-sum num"><span class="q">1 дона</span>32 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЭРКИН<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА УРГУТ</span>
+                  <span class="chip warn" title="Ҳали бажарилмаган, муддатдан ўтди"><svg class="i"><use href="#i-clock"/></svg>янги · 2 соат кечикди</span>
+                </li>
+                <li class="r" title="Мезим форте №20 · 1 × 29 000 сўм">
+                  <span class="r-name">Мезим форте №20</span><span class="r-sum num"><span class="q">1 дона</span>29 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА УРГУТ<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЧИНОЗ</span>
+                  <span class="chip crit" title="Берувчи филиал рад этди"><svg class="i"><use href="#i-ban"/></svg>рад: «қолдиқ йўқ»</span>
+                </li>
+                <li class="r" title="Цитрамон П №10 · 4 × 5 500 сўм">
+                  <span class="r-name">Цитрамон П №10</span><span class="r-sum num"><span class="q">4 дона</span>22 000<em>сўм</em></span>
+                  <span class="r-route">СКЛАД<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЭРКИН</span>
+                  <span class="chip neutral" title="Кун охирида бажарилмасдан ёпилди"><svg class="i"><use href="#i-lock"/></svg>ёпилди</span>
+                </li>
+                <li class="r" title="Цитрамон П №10 · 2 × 5 500 сўм">
+                  <span class="r-name">Цитрамон П №10</span><span class="r-sum num"><span class="q">2 дона</span>11 000<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЧИНОЗ<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА УРГУТ</span>
+                  <span class="chip warn" title="Ҳали бажарилмаган, муддатдан ўтди"><svg class="i"><use href="#i-clock"/></svg>янги · 30 дақ кечикди</span>
+                </li>
+                <li class="r" title="Цитрамон П №10 · 1 × 5 500 сўм">
+                  <span class="r-name">Цитрамон П №10</span><span class="r-sum num"><span class="q">1 дона</span>5 500<em>сўм</em></span>
+                  <span class="r-route">ДОРИХОНА ЭРКИН<svg class="i"><use href="#i-arrow"/></svg>ДОРИХОНА ЧИНОЗ</span>
+                  <span class="chip neutral" title="Кун охирида бажарилмасдан ёпилди"><svg class="i"><use href="#i-lock"/></svg>ёпилди</span>
+                </li>
+              </ul>
+              <button class="more" type="button">яна 10 та<svg class="i"><use href="#i-chev"/></svg></button>
+            </section>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <dl class="note">
+    <dt>Кўчириш · ABC</dt>
+    <dd><b>Ғоя:</b> филиаллараро кўчириш вазифалари пул бўйича A / B / C га ажратилади, бажарилганлар ва бажарилмаганлар эса ёнма-ён икки устунда кўрсатилади — менежер аввало қиммат (A) вазифалардан қайси бири қолганини бир қарашда кўради.</dd>
+    <dt>Қоида</dt>
+    <dd>ABC бутун тармоқнинг кунлик вазифалари суммаси (сон × кирим нархи) бўйича ҳисобланади: <b>A</b> — жами сумманинг 80% и, <b>B</b> — кейинги 15%, <b>C</b> — қолган 5%. <b>Бажарилди</b> — берилди ёки олинди; <b>бажарилмади</b> — ҳали янги, кун охирида ёпилди ёки рад этилди. Фоиз вазифалар сони бўйича.</dd>
+    <dt>Урғу</dt>
+    <dd>Бажарилмаган A вазифалар қизил чегарали алоҳида блокда; матрицада 70% дан паст катаклар қизил ва огоҳлантириш белгиси билан. Лайм ранг фақат A ва асосий ҳаракатда, шафтоли — бажарилмаганларда.</dd>
+  </dl>
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('theme-toggle');
+    var label = document.getElementById('theme-label');
+    var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+    function isLight() {
+      var t = root.getAttribute('data-theme');
+      if (t) return t === 'light';
+      return !!(mq && mq.matches);
+    }
+    function paint() {
+      var light = isLight();
+      root.classList.toggle('is-light', light);
+      label.textContent = light ? 'Кун' : 'Тун';
+    }
+    btn.addEventListener('click', function () {
+      var next = isLight() ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('ts-theme', next); } catch (e) {}
+      paint();
+    });
+    if (mq && mq.addEventListener) mq.addEventListener('change', paint);
+    paint();
+
+    // ABC таблари: фақат кўриниш ҳолати
+    var tabs = document.querySelectorAll('.tab');
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        tabs.forEach(function (x) { x.setAttribute('aria-selected', x === t ? 'true' : 'false'); });
+      });
+    });
+  })();
+</script>
+<script>
+  // Давр танлаш: фақат кўриниш ҳолати
+  document.querySelectorAll('.seg button').forEach(function (b, _, all) {
+    b.addEventListener('click', function () {
+      all.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    });
+  });
+</script>
+</body>
+</html>

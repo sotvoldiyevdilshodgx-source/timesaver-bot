@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="uz-Cyrl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TimeSaver — Вариант 5: Дорихона</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: clinical ERP window — titlebar / 236px nav rail / dense work area: header → 4 KPI tiles → transfer table (5fr) + ABC expiry table (7fr). Hairline rows, no zebra, status in chips. */
+:root{
+  --stage:#E7EBEF; --win:#FFFFFF; --side:#F5F7F9; --sunk:#F3F5F8;
+  --line:#E1E6EB; --line-2:#EEF1F4;
+  --ink:#0F1828; --ink-2:#465467; --ink-3:#647083;
+  --primary:#1F2A6B; --primary-hover:#2B3890; --on-primary:#FFFFFF;
+  --primary-soft:#E9ECF7; --primary-ink:#1F2A6B;
+  --ok:#0A7366; --ok-bg:#E1F2EE;
+  --warn:#8F5600; --warn-bg:#FCEFD6;
+  --bad:#B42318; --bad-bg:#FDE7E4;
+  --watch:#465467; --watch-bg:#EDF0F4;
+  --badge-bg:#D92D20; --badge-fg:#FFFFFF;
+  --bar:#1F2A6B; --track:#E8EBF0;
+  --seq-a:#1F2A6B; --seq-b:#6F7BBE; --seq-c:#BCC3E3;
+  --lime:#D4F06A; --peach:#FF9E7A;
+  --close-hover:#C42B1C;
+  --shadow:0 1px 2px rgba(15,24,40,.06), 0 30px 60px -20px rgba(15,24,40,.28);
+  --f-sans:"IBM Plex Sans", "Inter", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --stage:#05080C; --win:#0E141B; --side:#0B1016; --sunk:#131A23;
+    --line:#222C38; --line-2:#19212B;
+    --ink:#E6EBF1; --ink-2:#A5B0BE; --ink-3:#8793A3;
+    --primary:#4757CF; --primary-hover:#5868DE; --on-primary:#FFFFFF;
+    --primary-soft:#1A2147; --primary-ink:#B3BCFF;
+    --ok:#46C9B4; --ok-bg:#0E2C28;
+    --warn:#F1B556; --warn-bg:#32240C;
+    --bad:#FF8F85; --bad-bg:#3A1613;
+    --watch:#A5B0BE; --watch-bg:#19212B;
+    --badge-bg:#F97066; --badge-fg:#1A0705;
+    --bar:#7C89F2; --track:#1D2631;
+    --seq-a:#9AA5FA; --seq-b:#5A68C9; --seq-c:#323D80;
+    --close-hover:#C42B1C;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 30px 60px -20px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --stage:#05080C; --win:#0E141B; --side:#0B1016; --sunk:#131A23;
+  --line:#222C38; --line-2:#19212B;
+  --ink:#E6EBF1; --ink-2:#A5B0BE; --ink-3:#8793A3;
+  --primary:#4757CF; --primary-hover:#5868DE; --on-primary:#FFFFFF;
+  --primary-soft:#1A2147; --primary-ink:#B3BCFF;
+  --ok:#46C9B4; --ok-bg:#0E2C28;
+  --warn:#F1B556; --warn-bg:#32240C;
+  --bad:#FF8F85; --bad-bg:#3A1613;
+  --watch:#A5B0BE; --watch-bg:#19212B;
+  --badge-bg:#F97066; --badge-fg:#1A0705;
+  --bar:#7C89F2; --track:#1D2631;
+  --seq-a:#9AA5FA; --seq-b:#5A68C9; --seq-c:#323D80;
+  --close-hover:#C42B1C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 30px 60px -20px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--stage); color:var(--ink);
+  font-family:var(--f-sans); font-size:13px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  padding-block:40px 32px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+.num, td, .kpi-val, .tab-meta{font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1}
+button{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--primary-ink); outline-offset:2px; border-radius:4px}
+svg.i{width:16px; height:16px; flex:none; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round}
+
+.stage{overflow-x:auto; padding-bottom:8px}
+.win{
+  width:1280px; height:800px; margin:0 auto;
+  background:var(--win); border:1px solid var(--line); border-radius:10px;
+  box-shadow:var(--shadow); overflow:hidden;
+  display:grid; grid-template-rows:36px minmax(0,1fr);
+}
+
+/* Titlebar */
+.titlebar{display:flex; align-items:center; background:var(--side); border-bottom:1px solid var(--line); user-select:none}
+.tb-brand{display:flex; align-items:center; gap:9px; padding-left:14px; flex:1; min-width:0}
+.tb-brand svg{width:18px; height:18px}
+.tb-name{font-weight:600; font-size:12.5px; letter-spacing:.01em}
+.tb-sep{color:var(--ink-3)}
+.tb-ctx{color:var(--ink-3); font-size:12px}
+.wc{display:flex; height:100%}
+.wc button{width:46px; height:100%; border:0; background:transparent; display:grid; place-items:center; cursor:default; color:var(--ink-2)}
+.wc button:hover{background:var(--line-2); color:var(--ink)}
+.wc button.close:hover{background:var(--close-hover); color:#FFFFFF}
+.wc svg{width:10px; height:10px; stroke:currentColor; stroke-width:1; fill:none}
+
+.app{display:grid; grid-template-columns:236px minmax(0,1fr); min-height:0}
+
+/* Sidebar */
+.side{background:var(--side); border-right:1px solid var(--line); display:flex; flex-direction:column; min-height:0; padding:12px 10px}
+.org{display:flex; align-items:center; gap:10px; padding:6px 8px 14px; border-bottom:1px solid var(--line); margin-bottom:10px}
+.org-mark{width:30px; height:30px; border-radius:7px; background:var(--primary-soft); color:var(--primary-ink); display:grid; place-items:center; font-weight:700; font-size:12px}
+.org-name{font-weight:600; font-size:13px; line-height:1.2}
+.org-sub{font-size:11.5px; color:var(--ink-3)}
+.nav{display:flex; flex-direction:column; gap:14px; flex:1}
+.nav-group{display:flex; flex-direction:column; gap:1px}
+.nav-label{font-size:10.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); padding:0 10px 5px}
+.nav a{
+  position:relative; display:flex; align-items:center; gap:10px;
+  height:32px; padding:0 10px; border-radius:6px;
+  color:var(--ink-2); text-decoration:none; font-weight:500;
+}
+.nav a:hover{background:var(--line-2); color:var(--ink)}
+.nav a.active{background:var(--primary-soft); color:var(--primary-ink); font-weight:600}
+.nav a.active::before{content:""; position:absolute; left:-10px; top:7px; bottom:7px; width:3px; border-radius:0 3px 3px 0; background:var(--primary-ink)}
+.nav a .grow{flex:1}
+.badge{min-width:18px; height:18px; padding:0 6px; border-radius:9px; background:var(--badge-bg); color:var(--badge-fg); font-size:11px; font-weight:600; display:inline-grid; place-items:center; font-variant-numeric:tabular-nums}
+.pill-ok{height:18px; padding:0 6px; border-radius:4px; background:var(--ok-bg); color:var(--ok); font-size:11px; font-weight:600; display:inline-grid; place-items:center; font-variant-numeric:tabular-nums}
+.side-foot{border-top:1px solid var(--line); padding:10px 8px 2px; display:flex; flex-direction:column; gap:6px; font-size:11.5px; color:var(--ink-3)}
+.live{display:flex; align-items:center; gap:7px; color:var(--ink-2)}
+.dot{width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px var(--ok-bg)}
+
+/* Main */
+.main{min-width:0; min-height:0; overflow:auto; display:flex; flex-direction:column}
+.toolbar{display:flex; align-items:center; gap:12px; height:48px; padding:0 20px; border-bottom:1px solid var(--line); flex:none}
+.crumbs{display:flex; align-items:center; gap:6px; color:var(--ink-3); font-size:12px; flex:1}
+.crumbs b{color:var(--ink); font-weight:600}
+.search{display:flex; align-items:center; gap:8px; width:300px; height:30px; padding:0 10px; border:1px solid var(--line); border-radius:6px; background:var(--sunk); color:var(--ink-3)}
+.search input{border:0; outline:0; background:transparent; flex:1; min-width:0; font:inherit; color:var(--ink)}
+.search input::placeholder{color:var(--ink-3)}
+.search:focus-within{border-color:var(--primary-ink)}
+.icon-btn{width:30px; height:30px; border-radius:6px; border:1px solid var(--line); background:var(--win); display:grid; place-items:center; color:var(--ink-2); cursor:pointer; position:relative}
+.icon-btn:hover{background:var(--line-2); color:var(--ink)}
+.icon-btn .ping{position:absolute; top:5px; right:6px; width:6px; height:6px; border-radius:50%; background:var(--badge-bg); box-shadow:0 0 0 2px var(--win)}
+.theme-sw{display:flex; padding:2px; gap:2px; border:1px solid var(--line); border-radius:7px; background:var(--sunk)}
+.theme-sw button{width:28px; height:24px; border:0; border-radius:5px; background:transparent; color:var(--ink-3); display:grid; place-items:center; cursor:pointer}
+.theme-sw button:hover{color:var(--ink)}
+.theme-sw button[aria-pressed="true"]{background:var(--win); color:var(--ink); box-shadow:0 1px 2px rgba(15,24,40,.12)}
+.theme-sw svg.i{width:14px; height:14px}
+
+.content{padding:18px 20px 20px; display:flex; flex-direction:column; gap:16px}
+
+.head{display:flex; align-items:flex-end; gap:16px}
+.head-text{flex:1; min-width:0}
+h1{margin:0; font-size:21px; line-height:1.25; font-weight:600; letter-spacing:-.01em; text-wrap:balance}
+.date{color:var(--ink-3); font-size:12.5px; margin-top:2px}
+.sync{display:flex; align-items:center; gap:10px}
+.sync-state{display:flex; align-items:center; gap:8px; height:32px; padding:0 12px; border:1px solid var(--line); border-radius:6px; color:var(--ink-2); font-size:12.5px; background:var(--win)}
+.sync-state b{color:var(--ink); font-weight:600}
+.btn{height:32px; padding:0 14px; border-radius:6px; display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:12.5px; cursor:pointer; border:1px solid transparent; white-space:nowrap}
+.btn-sec{background:var(--win); border-color:var(--line); color:var(--ink)}
+.btn-sec:hover{background:var(--line-2)}
+.btn-pri{background:var(--primary); color:var(--on-primary)}
+.btn-pri:hover{background:var(--primary-hover)}
+.kbd{font-family:var(--f-mono); font-size:10.5px; font-weight:500; padding:1px 5px; border-radius:3px; background:rgba(255,255,255,.16)}
+
+/* KPI tiles */
+.kpis{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); border:1px solid var(--line); border-radius:8px; overflow:hidden}
+.kpi{padding:14px 16px 13px; display:grid; grid-template-columns:1fr auto; grid-template-rows:auto auto auto; column-gap:12px; row-gap:2px; position:relative; cursor:pointer}
+.kpi + .kpi{border-left:1px solid var(--line)}
+.kpi:hover{background:var(--sunk)}
+.kpi-label{font-size:12px; color:var(--ink-2); font-weight:500}
+.kpi-val{font-size:28px; line-height:1.15; font-weight:600; letter-spacing:-.02em; margin-top:4px}
+.kpi-val small{font-size:13px; font-weight:500; color:var(--ink-3); margin-left:4px; letter-spacing:0}
+.kpi-sub{font-size:11.5px; color:var(--ink-3); display:flex; align-items:center; gap:6px; margin-top:3px}
+.kpi-ic{grid-row:1 / span 2; grid-column:2; width:30px; height:30px; border-radius:7px; display:grid; place-items:center}
+.kpi-ic.warn{background:var(--warn-bg); color:var(--warn)}
+.kpi-ic.watch{background:var(--watch-bg); color:var(--watch)}
+.kpi-ic.ok{background:var(--ok-bg); color:var(--ok)}
+.kpi-ic.bad{background:var(--bad-bg); color:var(--bad)}
+
+/* Chips */
+.chip{display:inline-flex; align-items:center; gap:4px; height:20px; padding:0 7px; border-radius:4px; font-size:11.5px; font-weight:600; white-space:nowrap; font-variant-numeric:tabular-nums}
+.chip svg.i{width:12px; height:12px; stroke-width:2}
+.chip.ok{background:var(--ok-bg); color:var(--ok)}
+.chip.warn{background:var(--warn-bg); color:var(--warn)}
+.chip.bad{background:var(--bad-bg); color:var(--bad)}
+.chip.watch{background:var(--watch-bg); color:var(--watch)}
+
+/* Panels */
+.grid2{display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:16px; align-items:stretch}
+.panel{border:1px solid var(--line); border-radius:8px; background:var(--win); min-width:0; display:flex; flex-direction:column}
+.panel-h{display:flex; align-items:center; gap:10px; padding:12px 14px 10px}
+.panel-h h2{margin:0; font-size:14px; font-weight:600; flex:1; display:flex; align-items:center; gap:8px}
+.new{font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--primary-ink); background:var(--primary-soft); padding:2px 6px; border-radius:3px}
+.panel-meta{font-size:12px; color:var(--ink-3)}
+.link{color:var(--primary-ink); font-weight:600; font-size:12px; text-decoration:none; display:inline-flex; align-items:center; gap:4px}
+.link:hover{text-decoration:underline}
+
+.tbl-wrap{overflow:auto; min-width:0}
+table{width:100%; border-collapse:separate; border-spacing:0}
+th{
+  position:sticky; top:0; z-index:1; background:var(--sunk);
+  text-align:left; font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3);
+  height:30px; padding:0 12px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); white-space:nowrap
+}
+td{height:42px; padding:0 12px; border-bottom:1px solid var(--line-2); white-space:nowrap; vertical-align:middle}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--sunk)}
+.r{text-align:right}
+.muted{color:var(--ink-3)}
+.idx{color:var(--ink-3); width:28px; padding-right:0}
+.drug{font-weight:500; color:var(--ink)}
+.exp{display:flex; align-items:center; gap:8px}
+.exp .d{min-width:74px}
+.sum{font-weight:600}
+.sum .cur{font-weight:400; color:var(--ink-3); margin-left:3px}
+
+/* Transfer table */
+.branch{font-weight:600; font-size:12.5px; letter-spacing:.02em}
+.branch-sub{font-size:11.5px; color:var(--ink-3); font-weight:400; letter-spacing:0}
+.trf td, .trf th{padding:0 10px}
+.trf td{height:58px}
+.trf td:first-child, .trf th:first-child{padding-left:14px}
+.trf td:last-child, .trf th:last-child{padding-right:14px}
+.prog{display:flex; align-items:center; gap:8px; min-width:96px}
+.track{flex:1; height:6px; border-radius:3px; background:var(--track); overflow:hidden}
+.fill{height:100%; border-radius:3px; background:var(--bar)}
+.pct{width:36px; text-align:right; font-weight:600}
+.total td{background:var(--sunk); border-bottom:0; height:44px; font-weight:600}
+.total td:first-child{border-bottom-left-radius:8px}
+.total td:last-child{border-bottom-right-radius:8px}
+.late{padding:12px 14px 4px; display:flex; flex-direction:column}
+.late-h{font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3); margin-bottom:4px}
+.late-row{display:flex; align-items:center; gap:10px; height:36px; border-bottom:1px solid var(--line-2)}
+.late-row:last-child{border-bottom:0}
+.late-row .what{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.late-row .what b{font-weight:500}
+.late-row .route{color:var(--ink-3); font-size:11.5px; margin-left:6px}
+.late-row .t{font-weight:600; color:var(--bad)}
+.trf-foot{display:flex; align-items:center; gap:14px; padding:12px 14px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-3); margin-top:auto}
+.trf-foot .grow{flex:1}
+
+/* ABC */
+.tabs{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; padding:0 14px 12px}
+.tab{
+  display:flex; flex-direction:column; align-items:flex-start; gap:1px; text-align:left;
+  padding:8px 10px 8px 12px; border:1px solid var(--line); border-radius:6px; background:var(--win); cursor:pointer
+}
+.tab:hover{background:var(--sunk)}
+.tab[aria-selected="true"]{border-color:var(--primary-ink); background:var(--primary-soft); box-shadow:inset 0 0 0 1px var(--primary-ink)}
+.tab-top{display:flex; align-items:center; gap:7px; font-weight:700; font-size:13px}
+.sw{width:9px; height:9px; border-radius:2px}
+.tab-meta{font-size:12px; color:var(--ink-2)}
+.tab[aria-selected="true"] .tab-meta{color:var(--ink)}
+.share{padding:0 14px 12px; display:flex; flex-direction:column; gap:6px}
+.share-bar{display:flex; gap:2px; height:8px}
+.share-bar span{display:block; height:100%}
+.share-bar span:first-child{border-radius:4px 0 0 4px}
+.share-bar span:last-child{border-radius:0 4px 4px 0}
+.share-cap{display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-3)}
+.share-cap b{color:var(--ink); font-weight:600}
+.abc-foot{display:flex; align-items:center; gap:12px; padding:10px 14px; border-top:1px solid var(--line)}
+.legend{display:flex; gap:12px; flex:1; font-size:11.5px; color:var(--ink-3); flex-wrap:wrap}
+.legend span{display:inline-flex; align-items:center; gap:5px}
+.legend i{width:8px; height:8px; border-radius:2px; display:inline-block}
+
+.note{max-width:1280px; margin:20px auto 0; color:var(--ink-2); font-size:13px; line-height:1.6}
+.note p{margin:0 0 2px; max-width:80ch}
+.note b{color:var(--ink)}
+
+@media (prefers-reduced-motion: no-preference){
+  .nav a, .btn, .tab, td, .kpi, .icon-btn{transition:background-color .12s ease, color .12s ease, border-color .12s ease}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11h14V9"/><path d="M10 20v-6h4v6"/></symbol>
+    <symbol id="i-move" viewBox="0 0 24 24"><path d="M4 8h13"/><path d="m14 4 4 4-4 4"/><path d="M20 16H7"/><path d="m10 12-4 4 4 4"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5"/><path d="M12 12v9"/></symbol>
+    <symbol id="i-order" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8"/><path d="M18 14.8c2 .7 3.2 2.4 3.5 5.2"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3 10 14"/><path d="M21 3 14.5 21l-4.5-7-7-4.5z"/></symbol>
+    <symbol id="i-report" viewBox="0 0 24 24"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M9 17v-3M12 17v-6M15 17v-4"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></symbol>
+    <symbol id="i-log" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+    <symbol id="i-wand" viewBox="0 0 24 24"><path d="m4 20 11-11"/><path d="m13 7 2-2 4 4-2 2"/><path d="M19 2v3M17.5 3.5h3M6 3v2M5 4h2M20 14v2M19 15h2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.6L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.6L20 16"/><path d="M20 21v-5h-5"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0 5 5L21 13l-2 2-1.5-1.5"/><path d="M14.5 6.5 13 5l2-2 1.5 1.5a4 4 0 0 0-2 2z"/><path d="M14 10 4 20"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5h.01"/></symbol>
+    <symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M6 3h12M6 21h12"/><path d="M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M10 9.5v5M14 9.5v5"/></symbol>
+    <symbol id="i-userok" viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.6-3.6 3.2-5.5 6.5-5.5 1.5 0 2.8.4 3.9 1.1"/><path d="m15.5 18 2 2 4-4"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M4 20h16"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  </defs>
+</svg>
+
+<div class="stage">
+<div class="win" role="application" aria-label="TimeSaver">
+
+  <!-- Titlebar -->
+  <header class="titlebar">
+    <div class="tb-brand">
+      <svg viewBox="-85 -85 170 170" aria-hidden="true"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+      <span class="tb-name">TimeSaver</span>
+      <span class="tb-sep">·</span>
+      <span class="tb-ctx">Бошқарув панели</span>
+    </div>
+    <div class="wc">
+      <button type="button" aria-label="Йиғиш"><svg viewBox="0 0 10 10"><path d="M0 5.5h10"/></svg></button>
+      <button type="button" aria-label="Катталаштириш"><svg viewBox="0 0 10 10"><rect x=".5" y=".5" width="9" height="9"/></svg></button>
+      <button type="button" class="close" aria-label="Ёпиш"><svg viewBox="0 0 10 10"><path d="M.5.5l9 9M9.5.5l-9 9"/></svg></button>
+    </div>
+  </header>
+
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="side">
+      <div class="org">
+        <div class="org-mark">МФ</div>
+        <div>
+          <div class="org-name">Намуна Фарм</div>
+          <div class="org-sub">3 филиал · администратор</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Асосий меню">
+        <div class="nav-group">
+          <a href="#" class="active" aria-current="page"><svg class="i"><use href="#i-home"/></svg><span class="grow">Бош саҳифа</span></a>
+          <a href="#"><svg class="i"><use href="#i-move"/></svg><span class="grow">Кўчириш</span><span class="pill-ok">82%</span></a>
+          <a href="#"><svg class="i"><use href="#i-box"/></svg><span class="grow">Склад</span></a>
+          <a href="#"><svg class="i"><use href="#i-order"/></svg><span class="grow">Буюртма</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">Мижозлар</div>
+          <a href="#"><svg class="i"><use href="#i-users"/></svg><span class="grow">Фойдаланувчилар</span><span class="badge">3</span></a>
+          <a href="#"><svg class="i"><use href="#i-send"/></svg><span class="grow">Хабар юбориш</span></a>
+          <a href="#"><svg class="i"><use href="#i-report"/></svg><span class="grow">Ҳисоботлар</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">Тизим</div>
+          <a href="#"><svg class="i"><use href="#i-chart"/></svg><span class="grow">Статистика</span></a>
+          <a href="#"><svg class="i"><use href="#i-log"/></svg><span class="grow">Журнал</span></a>
+          <a href="#"><svg class="i"><use href="#i-sliders"/></svg><span class="grow">Созламалар</span></a>
+          <a href="#"><svg class="i"><use href="#i-wand"/></svg><span class="grow">Созлаш устаси</span></a>
+        </div>
+      </nav>
+      <div class="side-foot">
+        <div class="live"><span class="dot"></span>Бот ишлаяпти</div>
+        <div class="num">Сервер · 127.0.0.1:8080</div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="toolbar">
+        <div class="crumbs"><span>Намуна Фарм</span><svg class="i" style="width:12px;height:12px"><use href="#i-chev"/></svg><b>Бош саҳифа</b></div>
+        <label class="search" for="q"><svg class="i"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Дори ёки филиал қидириш"></label>
+        <button type="button" class="icon-btn" aria-label="Билдиришномалар"><svg class="i"><use href="#i-bell"/></svg><span class="ping"></span></button>
+        <div class="theme-sw" role="group" aria-label="Мавзу">
+          <button type="button" id="t-light" aria-pressed="true" aria-label="Ёруғ мавзу"><svg class="i"><use href="#i-sun"/></svg></button>
+          <button type="button" id="t-dark" aria-pressed="false" aria-label="Қоронғи мавзу"><svg class="i"><use href="#i-moon"/></svg></button>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- Greeting + sync -->
+        <section class="head">
+          <div class="head-text">
+            <h1>Хайрли кун, Намуна Фарм</h1>
+            <div class="date">Сешанба, 17 ноябрь 2026</div>
+          </div>
+          <div class="sync">
+            <div class="sync-state"><span class="dot"></span><span>Маълумот янгиланди · <b class="num">бугун 08:42</b></span></div>
+            <button type="button" class="btn btn-sec"><svg class="i"><use href="#i-wrench"/></svg>Техник режим</button>
+            <button type="button" class="btn btn-pri"><svg class="i"><use href="#i-refresh"/></svg>Янгилаш</button>
+          </div>
+        </section>
+
+        <!-- KPI -->
+        <section class="kpis" aria-label="Кўрсаткичлар">
+          <div class="kpi">
+            <div class="kpi-label">Срок яқин (90 кун)</div>
+            <div class="kpi-val">128<small>та</small></div>
+            <div class="kpi-ic warn"><svg class="i"><use href="#i-hourglass"/></svg></div>
+            <div class="kpi-sub">муддати 90 кундан кам</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">30+ кун турган</div>
+            <div class="kpi-val">342<small>та</small></div>
+            <div class="kpi-ic watch"><svg class="i"><use href="#i-pause"/></svg></div>
+            <div class="kpi-sub">30 кундан бери сотилмаган</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Фойдаланувчилар</div>
+            <div class="kpi-val">57<small>та</small></div>
+            <div class="kpi-ic ok"><svg class="i"><use href="#i-users"/></svg></div>
+            <div class="kpi-sub">ботда фаол ходимлар</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Тасдиқ кутмоқда</div>
+            <div class="kpi-val">3<small>та</small></div>
+            <div class="kpi-ic bad"><svg class="i"><use href="#i-userok"/></svg></div>
+            <div class="kpi-sub"><span class="chip bad"><svg class="i"><use href="#i-alert"/></svg>Кўриб чиқинг</span></div>
+          </div>
+        </section>
+
+        <div class="grid2">
+          <!-- Transfers -->
+          <section class="panel">
+            <div class="panel-h">
+              <h2>Бугунги кўчириш</h2>
+              <a href="#" class="link">Барчаси<svg class="i" style="width:13px;height:13px"><use href="#i-arrow"/></svg></a>
+            </div>
+            <div class="tbl-wrap">
+              <table class="trf">
+                <thead>
+                  <tr><th>Филиал</th><th>Бажарилди</th><th class="r">Кечикди</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><div class="branch">ДОРИХОНА ЧИНОЗ</div><div class="branch-sub num">69 / 75 та</div></td>
+                    <td><div class="prog"><div class="track"><div class="fill" style="width:92%"></div></div><span class="pct num">92%</span></div></td>
+                    <td class="r"><span class="chip ok"><svg class="i"><use href="#i-check"/></svg>0 кечикди</span></td>
+                  </tr>
+                  <tr>
+                    <td><div class="branch">ДОРИХОНА УРГУТ</div><div class="branch-sub num">38 / 50 та</div></td>
+                    <td><div class="prog"><div class="track"><div class="fill" style="width:76%"></div></div><span class="pct num">76%</span></div></td>
+                    <td class="r"><span class="chip warn"><svg class="i"><use href="#i-clock"/></svg>2 кечикди</span></td>
+                  </tr>
+                  <tr>
+                    <td><div class="branch">ДОРИХОНА ЭРКИН</div><div class="branch-sub num">16 / 25 та</div></td>
+                    <td><div class="prog"><div class="track"><div class="fill" style="width:64%"></div></div><span class="pct num">64%</span></div></td>
+                    <td class="r"><span class="chip bad"><svg class="i"><use href="#i-alert"/></svg>4 кечикди</span></td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr class="total">
+                    <td>Жами <span class="muted num" style="font-weight:400">· 123 / 150 та</span></td>
+                    <td><div class="prog"><div class="track"><div class="fill" style="width:82%"></div></div><span class="pct num">82%</span></div></td>
+                    <td class="r num">6 кечикди</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div class="late">
+              <div class="late-h">Энг узоқ кечикканлар</div>
+              <div class="late-row"><span class="what"><b>Цитрамон П №10</b><span class="route">ЭРКИН → ЧИНОЗ</span></span><span class="t num">4 соат 10 дақ</span></div>
+              <div class="late-row"><span class="what"><b>Линекс №16</b><span class="route">ЭРКИН → УРГУТ</span></span><span class="t num">3 соат 25 дақ</span></div>
+              <div class="late-row"><span class="what"><b>Нурофен 200мг №24</b><span class="route">УРГУТ → ЧИНОЗ</span></span><span class="t num">2 соат 40 дақ</span></div>
+            </div>
+            <div class="trf-foot">
+              <span class="grow">Кечикди — 2 соатдан ортиқ қабул қилинмаган</span>
+              <span class="num">Охирги: 08:37</span>
+            </div>
+          </section>
+
+          <!-- ABC -->
+          <section class="panel">
+            <div class="panel-h">
+              <h2>Срок · ABC таҳлил <span class="new">Янги</span></h2>
+              <span class="panel-meta num">128 та дори · 53,3 млн сўм</span>
+            </div>
+            <div class="tabs" role="tablist" aria-label="ABC гуруҳлари">
+              <button type="button" class="tab" role="tab" aria-selected="true" data-k="a">
+                <span class="tab-top"><span class="sw" style="background:var(--seq-a)"></span>A</span>
+                <span class="tab-meta">20 та · 42,6 млн</span>
+              </button>
+              <button type="button" class="tab" role="tab" aria-selected="false" data-k="b">
+                <span class="tab-top"><span class="sw" style="background:var(--seq-b)"></span>B</span>
+                <span class="tab-meta">31 та · 8,0 млн</span>
+              </button>
+              <button type="button" class="tab" role="tab" aria-selected="false" data-k="c">
+                <span class="tab-top"><span class="sw" style="background:var(--seq-c)"></span>C</span>
+                <span class="tab-meta">77 та · 2,7 млн</span>
+              </button>
+            </div>
+            <div class="share">
+              <div class="share-bar" aria-hidden="true">
+                <span style="width:80%; background:var(--seq-a)"></span>
+                <span style="width:15%; background:var(--seq-b)"></span>
+                <span style="width:5%; background:var(--seq-c)"></span>
+              </div>
+              <div class="share-cap"><span><b>A</b> — жами пулнинг <b class="num">80%</b> и</span><span class="num">B 15% · C 5%</span></div>
+            </div>
+            <div class="tbl-wrap" style="max-height:250px">
+              <table>
+                <thead>
+                  <tr><th class="idx">#</th><th>Дори</th><th>Муддат</th><th class="r">Қолдиқ</th><th class="r">Сумма</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td class="idx num">1</td><td class="drug">Аугментин 625мг №14</td><td><div class="exp"><span class="d num">12.01.2027</span><span class="chip warn">56 кун</span></div></td><td class="r num">46</td><td class="r sum num">8 740 000<span class="cur">сўм</span></td></tr>
+                  <tr><td class="idx num">2</td><td class="drug">Эссенциале форте №30</td><td><div class="exp"><span class="d num">28.12.2026</span><span class="chip warn">41 кун</span></div></td><td class="r num">38</td><td class="r sum num">6 270 000<span class="cur">сўм</span></td></tr>
+                  <tr><td class="idx num">3</td><td class="drug">Нурофен 200мг №24</td><td><div class="exp"><span class="d num">03.02.2027</span><span class="chip watch">78 кун</span></div></td><td class="r num">120</td><td class="r sum num">4 080 000<span class="cur">сўм</span></td></tr>
+                  <tr><td class="idx num">4</td><td class="drug">Линекс №16</td><td><div class="exp"><span class="d num">19.01.2027</span><span class="chip watch">63 кун</span></div></td><td class="r num">54</td><td class="r sum num">3 510 000<span class="cur">сўм</span></td></tr>
+                  <tr><td class="idx num">5</td><td class="drug">Цитрамон П №10</td><td><div class="exp"><span class="d num">07.12.2026</span><span class="chip bad"><svg class="i"><use href="#i-alert"/></svg>20 кун</span></div></td><td class="r num">300</td><td class="r sum num">1 650 000<span class="cur">сўм</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="abc-foot">
+              <div class="legend">
+                <span><i style="background:var(--bad)"></i>30 кундан кам</span>
+                <span><i style="background:var(--warn)"></i>30–60 кун</span>
+                <span><i style="background:var(--watch)"></i>60–90 кун</span>
+              </div>
+              <button type="button" class="btn btn-sec"><svg class="i"><use href="#i-download"/></svg>Яна 15 та · Excel'да юклаб олиш</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</div>
+
+<footer class="note">
+  <p><b>Вариант 5 «Дорихона».</b> Клиник аниқликдаги зич интерфейс: оқ ва совуқ кулранг фон, тўқ кўк асосий амаллар учун, яшил — меъёр, сариқ — муддат яқин, қизил — кечикиш ва хавф.</p>
+  <p><b>Кимга мос:</b> кун бўйи жадваллар билан ишлайдиган дорихона ходимлари, омбор ва филиал менежерлари.</p>
+  <p><b>Кучли томони:</b> муддат ва ҳолат белгилари бир қарашда кўринади, рақамлар устунда текис туради, жадвал сарлавҳаси ўз жойида қолади.</p>
+</footer>
+
+<script>
+(function(){
+  var root = document.documentElement;
+  var KEY = 'timesaver-v5-theme';
+  var bL = document.getElementById('t-light'), bD = document.getElementById('t-dark');
+  function effective(){
+    var t = root.getAttribute('data-theme');
+    if (t) return t;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function sync(){ var e = effective(); bL.setAttribute('aria-pressed', e === 'light'); bD.setAttribute('aria-pressed', e === 'dark'); }
+  function set(t){ root.setAttribute('data-theme', t); try { localStorage.setItem(KEY, t); } catch(e){} sync(); }
+  try { var s = localStorage.getItem(KEY); if (s === 'light' || s === 'dark') root.setAttribute('data-theme', s); } catch(e){}
+  bL.addEventListener('click', function(){ set('light'); });
+  bD.addEventListener('click', function(){ set('dark'); });
+  if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', sync); } catch(e){} }
+  sync();
+
+  var tabs = document.querySelectorAll('.tab');
+  tabs.forEach(function(t){ t.addEventListener('click', function(){ tabs.forEach(function(x){ x.setAttribute('aria-selected', x === t); }); }); });
+  document.querySelectorAll('a[href="#"]').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); }); });
+})();
+</script>
+</body>
+</html>

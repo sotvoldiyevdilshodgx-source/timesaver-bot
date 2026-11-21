@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="uz-Cyrl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TimeSaver — Вариант 3: Тун</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap">
+<script>
+  // Тема: аввал сақланган танлов, бўлмаса тизим созламаси
+  (function () {
+    try {
+      var t = localStorage.getItem('ts-theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+</script>
+<style>
+/* Layout: оғир ойна — тор тўқ навигация + 2 қаторли буйруқ панели (ҳолат+рақамлар, кейин кўчириш | ABC). */
+:root {
+  color-scheme: dark;
+  /* Ранг — тун (асосий) */
+  --page: #070A1E;
+  --win: #0E1333;
+  --side: #0A0F2A;
+  --surface: #141A42;
+  --surface-2: #1B2254;
+  --line: #252D63;
+  --line-soft: #1D2453;
+  --hi: rgba(255,255,255,.035);
+  --fg: #EEF0FB;
+  --fg-2: #B3B8DA;
+  --fg-3: #8C93C2;
+  --accent: #D4F06A;
+  --accent-ink: #D4F06A;
+  --on-accent: #11163A;
+  --accent-soft: rgba(212,240,106,.11);
+  --accent-line: rgba(212,240,106,.38);
+  --ring: #D4F06A;
+  --ring-track: #232B5E;
+  --warn: #FF9E7A;
+  --warn-ink: #FF9E7A;
+  --warn-soft: rgba(255,158,122,.13);
+  --good-ink: #7FE0A8;
+  --good-soft: rgba(127,224,168,.12);
+  --danger: #FF6B78;
+  --on-danger: #11163A;
+  --close-hover: #C42B1C;
+  --shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 24px 60px -24px rgba(0,0,0,.6);
+  --focus: #D4F06A;
+
+  /* Шрифт */
+  --font-ui: "Onest", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --fs-xs: 11.5px;
+  --fs-s: 12.5px;
+  --fs-m: 13.5px;
+  --fs-l: 15px;
+  --fs-h: 22px;
+  --fs-num: 34px;
+  --r-s: 6px;
+  --r-m: 10px;
+  --r-l: 14px;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --page: #E7E5DD;
+    --win: #F7F6F1;
+    --side: #EFEDE6;
+    --surface: #FFFFFF;
+    --surface-2: #F1F0EA;
+    --line: #E0DED4;
+    --line-soft: #EAE8E0;
+    --hi: rgba(255,255,255,0);
+    --fg: #11163A;
+    --fg-2: #41477A;
+    --fg-3: #62679A;
+    --accent: #D4F06A;
+    --accent-ink: #4D6400;
+    --on-accent: #11163A;
+    --accent-soft: #EEF8C9;
+    --accent-line: #B9D64A;
+    --ring: #1F2A6B;
+    --ring-track: #E7E6DE;
+    --warn: #FF9E7A;
+    --warn-ink: #B0441C;
+    --warn-soft: #FFEDE5;
+    --good-ink: #1C7445;
+    --good-soft: #E3F4EA;
+    --danger: #D7263D;
+    --on-danger: #FFFFFF;
+    --close-hover: #C42B1C;
+    --shadow: 0 1px 2px rgba(17,22,58,.06), 0 24px 56px -28px rgba(17,22,58,.28);
+    --focus: #1F2A6B;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --page: #E7E5DD;
+  --win: #F7F6F1;
+  --side: #EFEDE6;
+  --surface: #FFFFFF;
+  --surface-2: #F1F0EA;
+  --line: #E0DED4;
+  --line-soft: #EAE8E0;
+  --hi: rgba(255,255,255,0);
+  --fg: #11163A;
+  --fg-2: #41477A;
+  --fg-3: #62679A;
+  --accent: #D4F06A;
+  --accent-ink: #4D6400;
+  --on-accent: #11163A;
+  --accent-soft: #EEF8C9;
+  --accent-line: #B9D64A;
+  --ring: #1F2A6B;
+  --ring-track: #E7E6DE;
+  --warn: #FF9E7A;
+  --warn-ink: #B0441C;
+  --warn-soft: #FFEDE5;
+  --good-ink: #1C7445;
+  --good-soft: #E3F4EA;
+  --danger: #D7263D;
+  --on-danger: #FFFFFF;
+  --close-hover: #C42B1C;
+  --shadow: 0 1px 2px rgba(17,22,58,.06), 0 24px 56px -28px rgba(17,22,58,.28);
+  --focus: #1F2A6B;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--page);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: var(--fs-m);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+.num, td, .badge, .tab-meta { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Саҳна */
+.stage {
+  min-height: 100vh;
+  padding-block: 40px 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  overflow-x: auto;
+}
+
+/* Ойна */
+.window {
+  width: 1280px; height: 800px; flex: none;
+  display: grid; grid-template-rows: 40px 1fr;
+  background: var(--win);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.titlebar {
+  display: flex; align-items: center;
+  background: var(--side);
+  border-bottom: 1px solid var(--line-soft);
+  user-select: none;
+}
+.tb-brand { display: flex; align-items: center; gap: 9px; padding-left: 14px; flex: 1; min-width: 0; }
+.tb-brand svg { width: 18px; height: 18px; }
+.tb-brand b { font-weight: 600; font-size: var(--fs-s); letter-spacing: .01em; }
+.tb-brand span { color: var(--fg-3); font-size: var(--fs-s); }
+.tb-tools { display: flex; align-items: center; height: 100%; }
+.theme-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 28px; padding: 0 10px; margin-right: 8px;
+  background: transparent; border: 1px solid var(--line); border-radius: 7px;
+  color: var(--fg-2); font-size: var(--fs-xs); font-weight: 500; cursor: pointer;
+}
+.theme-btn:hover { background: var(--surface-2); color: var(--fg); }
+.theme-btn svg.i { width: 15px; height: 15px; }
+.theme-btn .sun { display: none; }
+.is-light .theme-btn .sun { display: block; }
+.is-light .theme-btn .moon { display: none; }
+.wbtn {
+  width: 46px; height: 40px; display: grid; place-items: center;
+  background: transparent; border: 0; color: var(--fg-2); cursor: default;
+}
+.wbtn:hover { background: var(--surface-2); color: var(--fg); }
+.wbtn.close:hover { background: var(--close-hover); color: #FFFFFF; }
+.wbtn svg { width: 10px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1; }
+
+.body { display: grid; grid-template-columns: 236px 1fr; min-height: 0; }
+
+/* Навигация */
+.nav {
+  background: var(--side);
+  border-right: 1px solid var(--line-soft);
+  display: flex; flex-direction: column;
+  padding: 14px 12px 12px;
+  min-height: 0;
+}
+.nav-group { display: flex; flex-direction: column; gap: 2px; }
+.nav-group + .nav-group { margin-top: 18px; }
+.nav-label {
+  font-size: 10.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--fg-3); padding: 0 10px 6px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 11px;
+  height: 36px; padding: 0 10px;
+  border-radius: 8px; border: 1px solid transparent;
+  color: var(--fg-2); text-decoration: none; font-weight: 500; font-size: var(--fs-m);
+  cursor: pointer;
+}
+.nav-item:hover { background: var(--surface); color: var(--fg); }
+.nav-item .grow { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-item.active { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent-ink); font-weight: 600; }
+.is-light .nav-item.active { background: var(--accent); border-color: var(--accent-line); color: var(--on-accent); }
+.badge {
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px;
+  display: inline-grid; place-items: center;
+  font-size: 11px; font-weight: 600; line-height: 1;
+}
+.badge.red { background: var(--danger); color: var(--on-danger); }
+.badge.soft { background: var(--surface-2); color: var(--fg-2); border: 1px solid var(--line); }
+.nav-foot {
+  margin-top: auto;
+  border: 1px solid var(--line); border-radius: var(--r-m);
+  background: var(--surface);
+  padding: 10px; display: grid; grid-template-columns: 34px 1fr; gap: 2px 10px; align-items: center;
+}
+.avatar {
+  grid-row: span 2; width: 34px; height: 34px; border-radius: 9px;
+  background: #1F2A6B; color: #D4F06A; display: grid; place-items: center;
+  font-size: 12px; font-weight: 700; letter-spacing: .02em;
+}
+.nav-foot b { font-size: var(--fs-s); font-weight: 600; }
+.nav-foot small { font-size: var(--fs-xs); color: var(--fg-3); display: flex; align-items: center; gap: 6px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good-ink); flex: none; }
+
+/* Асосий майдон */
+.main { overflow: auto; padding: 20px 24px 20px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.eyebrow { font-size: var(--fs-xs); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-3); }
+h1 { margin: 4px 0 0; font-size: var(--fs-h); font-weight: 600; letter-spacing: -.01em; text-wrap: balance; }
+.head-meta { display: flex; gap: 8px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 11px;
+  border-radius: 14px; border: 1px solid var(--line); background: var(--surface);
+  font-size: var(--fs-s); color: var(--fg-2); font-weight: 500;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  box-shadow: inset 0 1px 0 var(--hi);
+  min-width: 0;
+}
+.row-a { display: grid; grid-template-columns: 332px 1fr; gap: 16px; }
+.row-b { display: grid; grid-template-columns: 332px 1fr; gap: 16px; align-items: stretch; }
+
+/* Янгилаш ҳолати */
+.sync { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+.sync-top { display: flex; align-items: center; gap: 14px; }
+.ring { position: relative; flex: none; }
+.ring > svg { display: block; transform: rotate(-90deg); }
+.ring .track { stroke: var(--ring-track); fill: none; }
+.ring .val { stroke: var(--ring); fill: none; stroke-linecap: round; }
+.ring .center { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ring); }
+.sync-time { font-size: var(--fs-num); font-weight: 600; letter-spacing: -.02em; line-height: 1; }
+.sync-text { margin-top: 6px; color: var(--fg-2); font-size: var(--fs-s); white-space: nowrap; }
+.sync-text b { color: var(--fg); font-weight: 600; }
+.actions { display: flex; gap: 10px; }
+.btn {
+  height: 38px; padding: 0 14px; border-radius: 9px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: var(--fs-m); font-weight: 600; cursor: pointer; white-space: nowrap;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--fg);
+}
+.btn:hover { border-color: var(--fg-3); }
+.btn.primary { flex: 1; background: var(--accent); color: var(--on-accent); border-color: var(--accent-line); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn svg.i { width: 16px; height: 16px; }
+
+/* Кўрсаткичлар */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.stat {
+  padding: 14px 14px 15px; display: flex; flex-direction: column; gap: 10px; cursor: pointer;
+  transition: border-color .15s;
+}
+.stat:hover { border-color: var(--fg-3); }
+.stat-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ico {
+  width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center;
+  background: var(--surface-2); color: var(--fg-2); border: 1px solid var(--line-soft);
+}
+.ico svg.i { width: 16px; height: 16px; }
+.ico.warn { background: var(--warn-soft); color: var(--warn-ink); border-color: transparent; }
+.stat-label { font-size: var(--fs-s); color: var(--fg-2); font-weight: 500; min-height: 2.8em; }
+.stat-num { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+.stat-num b { font-size: var(--fs-num); font-weight: 600; letter-spacing: -.02em; line-height: 1; }
+.stat-num span { font-size: var(--fs-s); color: var(--fg-3); white-space: nowrap; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px;
+  border-radius: 11px; font-size: 11.5px; font-weight: 600; white-space: nowrap;
+}
+.chip svg.i { width: 12px; height: 12px; stroke-width: 2; }
+.chip.warn { background: var(--warn-soft); color: var(--warn-ink); }
+.chip.good { background: var(--good-soft); color: var(--good-ink); }
+.chip.neutral { background: var(--surface-2); color: var(--fg-2); }
+.chip.new { background: var(--accent); color: var(--on-accent); letter-spacing: .04em; text-transform: uppercase; font-size: 10.5px; height: 20px; }
+
+/* Карта сарлавҳаси */
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 16px 18px 0; }
+.card-title { display: flex; align-items: center; gap: 8px; font-size: var(--fs-l); font-weight: 600; margin: 0; }
+.card-sub { margin-top: 3px; font-size: var(--fs-s); color: var(--fg-3); }
+.link {
+  display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 8px;
+  color: var(--fg-2); font-size: var(--fs-s); font-weight: 600; background: transparent; border: 1px solid transparent; cursor: pointer;
+}
+.link:hover { background: var(--surface-2); color: var(--fg); }
+.link svg.i { width: 15px; height: 15px; }
+
+/* Кўчириш */
+.move { display: flex; flex-direction: column; }
+.move-total { margin: 12px 18px 2px; padding: 12px 14px; border-radius: var(--r-m); background: var(--surface-2); border: 1px solid var(--line-soft); }
+.mt-row { display: flex; align-items: baseline; justify-content: space-between; }
+.mt-row span { font-size: var(--fs-s); color: var(--fg-2); }
+.mt-row b { font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+.bar { height: 6px; border-radius: 3px; background: var(--ring-track); margin-top: 9px; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 3px; background: var(--ring); }
+.branches { list-style: none; margin: 0; padding: 6px 8px; display: flex; flex-direction: column; flex: 1; }
+.branch {
+  display: grid; grid-template-columns: 54px 1fr 16px; align-items: center; gap: 14px;
+  padding: 10px; border-radius: var(--r-m); cursor: pointer;
+}
+.branch + .branch { border-top: 1px solid var(--line-soft); }
+.branch:hover { background: var(--surface-2); }
+.branch:hover + .branch { border-top-color: transparent; }
+.branch .center { font-size: 13px; font-weight: 600; color: var(--fg); }
+.br-name { font-size: var(--fs-m); font-weight: 600; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.br-meta { margin-top: 5px; display: flex; gap: 8px; align-items: center; }
+.br-meta small { font-size: var(--fs-xs); color: var(--fg-3); }
+.chev { color: var(--fg-3); width: 16px; height: 16px; }
+.card-foot { padding: 4px 10px 12px; }
+
+/* ABC */
+.abc { display: flex; flex-direction: column; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px 18px 0; }
+.tab {
+  text-align: left; cursor: pointer;
+  padding: 10px 12px 11px; border-radius: var(--r-m);
+  background: transparent; border: 1px solid var(--line);
+  display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center;
+}
+.tab:hover { background: var(--surface-2); }
+.tab-letter {
+  grid-row: span 2; width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center;
+  font-size: 15px; font-weight: 700; background: var(--surface-2); color: var(--fg-2);
+}
+.tab-meta { font-size: var(--fs-s); font-weight: 600; color: var(--fg); white-space: nowrap; }
+.tab-share { display: flex; align-items: center; gap: 8px; }
+.tab-share .bar { flex: 1; margin: 0; height: 4px; }
+.tab-share small { font-size: var(--fs-xs); color: var(--fg-3); width: 28px; text-align: right; font-variant-numeric: tabular-nums; }
+.tab[aria-selected="true"] { border-color: var(--accent-line); background: var(--accent-soft); }
+.tab[aria-selected="true"] .tab-letter { background: var(--accent); color: var(--on-accent); }
+
+.tbl-wrap { padding: 8px 10px 0; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--fg-3);
+  text-align: left; padding: 10px 10px 8px; border-bottom: 1px solid var(--line);
+}
+td { padding: 0 10px; height: 41px; border-bottom: 1px solid var(--line-soft); font-size: var(--fs-m); white-space: nowrap; }
+tbody tr { cursor: pointer; }
+tbody tr:hover td { background: var(--surface-2); }
+tbody tr:hover td:first-child { border-radius: 8px 0 0 8px; }
+tbody tr:hover td:last-child { border-radius: 0 8px 8px 0; }
+tbody tr:last-child td { border-bottom: 0; }
+.c-n { width: 34px; color: var(--fg-3); }
+.c-name { font-weight: 500; }
+.c-date { width: 156px; }
+.c-date .d { display: inline-block; width: 86px; }
+.c-qty { width: 72px; text-align: right; }
+.c-sum { width: 196px; text-align: right; }
+.sum { display: inline-flex; align-items: center; gap: 10px; justify-content: flex-end; }
+.sum .bar { width: 48px; margin: 0; height: 4px; }
+.sum b { font-weight: 600; min-width: 64px; }
+.sum em { font-style: normal; color: var(--fg-3); font-size: var(--fs-s); }
+th.c-qty, th.c-sum { text-align: right; }
+
+.abc-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 18px 14px; border-top: 1px solid var(--line-soft); margin-top: 6px; }
+.abc-foot small { font-size: var(--fs-s); color: var(--fg-3); }
+.btn.excel { height: 34px; font-size: var(--fs-s); }
+
+/* Изоҳ */
+.note {
+  width: 1280px; max-width: 100%;
+  color: var(--fg-2); font-size: var(--fs-m); line-height: 1.55;
+  display: grid; grid-template-columns: 160px 1fr; gap: 4px 20px;
+}
+.note dt { color: var(--fg-3); font-size: var(--fs-xs); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding-top: 3px; }
+.note dd { margin: 0; max-width: 78ch; }
+.note dd b { color: var(--fg); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9v10h4.5v-5h3v5H18V9"/></symbol>
+    <symbol id="i-move" viewBox="0 0 24 24"><path d="M4 8h13"/><path d="m14 4.5 3.5 3.5L14 11.5"/><path d="M20 16H7"/><path d="m10 12.5-3.5 3.5 3.5 3.5"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5z"/><path d="M4 7.5 12 11l8-3.5"/><path d="M12 11v9"/></symbol>
+    <symbol id="i-order" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 4v2h6V4"/><path d="M8.5 11h7M8.5 15h4.5"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><path d="M15.5 5.6a3 3 0 0 1 0 5.8"/><path d="M17.2 14.4c1.8.5 3 2 3.3 4.6"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M20 4 4 10.5l6.5 2.5L13 19.5z"/><path d="m10.5 13 4.5-4.5"/></symbol>
+    <symbol id="i-report" viewBox="0 0 24 24"><path d="M14 4H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M14 4v5h5"/><path d="M9 16v-3M12 16v-5M15 16v-2"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></symbol>
+    <symbol id="i-log" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" stroke-width="2.4"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4 18 18M6 18l1.6-1.6M16.4 7.6 18 6"/></symbol>
+    <symbol id="i-wand" viewBox="0 0 24 24"><path d="m4 20 11-11"/><path d="m13 7 2-2 4 4-2 2"/><path d="M18 3v2M21 6h-2M7 4v2M8 5H6M19 15v2M20 16h-2"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 0 1-13 5.1"/><path d="M4.5 12a7.5 7.5 0 0 1 13-5.1"/><path d="M17.5 3.5v3.4h-3.4"/><path d="M6.5 20.5v-3.4h3.4"/></symbol>
+    <symbol id="i-tool" viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0 4.8 4.8L20 12l-8 8-3.5-3.5 8-8"/><path d="M14.5 6.5 16 5l3 3-1.5 1.5"/><path d="m4 20 4.5-4.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 3 19.5h18z"/><path d="M12 10v4.2M12 17h.01"/></symbol>
+    <symbol id="i-hour" viewBox="0 0 24 24"><path d="M7 4h10M7 20h10"/><path d="M8 4c0 4 8 4 8 8s-8 4-8 8M16 4c0 4-8 4-8 8"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M10 9.5v5M14 9.5v5"/></symbol>
+    <symbol id="i-user-check" viewBox="0 0 24 24"><circle cx="10" cy="8.5" r="3.2"/><path d="M4.5 19c.6-3 2.8-4.8 5.5-4.8 1.3 0 2.5.4 3.4 1.1"/><path d="m15 18 2 2 4-4"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13.5 6.5 19 12l-5.5 5.5"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M5 19.5h14"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+  </defs>
+</svg>
+
+<div class="stage">
+  <div class="window" role="application" aria-label="TimeSaver ойнаси">
+
+    <!-- Сарлавҳа сатри -->
+    <header class="titlebar">
+      <div class="tb-brand">
+        <svg viewBox="-85 -85 170 170" aria-hidden="true"><circle r="85" fill="#1F2A6B"/><path d="M0.00 -52.00 A52.0 52.0 0 1 1 -52.00 0.00" fill="none" stroke="#D4F06A" stroke-width="10.0" stroke-linecap="round"/><circle cx="-37.0" cy="-37.0" r="6.0" fill="#FF9E7A"/><rect x="-30.0" y="-27.0" width="60.0" height="18.0" rx="9.0" fill="#FF9E7A"/><rect x="-9.0" y="-27.0" width="18.0" height="56.0" rx="9.0" fill="#FF9E7A"/></svg>
+        <b>TimeSaver</b>
+        <span>· Бошқарув панели</span>
+      </div>
+      <div class="tb-tools">
+        <button class="theme-btn" id="theme-toggle" type="button" aria-label="Мавзуни алмаштириш">
+          <svg class="i moon"><use href="#i-moon"/></svg>
+          <svg class="i sun"><use href="#i-sun"/></svg>
+          <span id="theme-label">Тун</span>
+        </button>
+        <button class="wbtn" type="button" aria-label="Йиғиш"><svg viewBox="0 0 10 10"><path d="M0 5.5h10"/></svg></button>
+        <button class="wbtn" type="button" aria-label="Катталаштириш"><svg viewBox="0 0 10 10"><rect x=".5" y=".5" width="9" height="9" rx="1"/></svg></button>
+        <button class="wbtn close" type="button" aria-label="Ёпиш"><svg viewBox="0 0 10 10"><path d="M.5.5l9 9M9.5.5l-9 9"/></svg></button>
+      </div>
+    </header>
+
+    <div class="body">
+      <!-- Навигация -->
+      <nav class="nav" aria-label="Асосий меню">
+        <div class="nav-group">
+          <a class="nav-item active" aria-current="page"><svg class="i"><use href="#i-home"/></svg><span class="grow">Бош саҳифа</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-move"/></svg><span class="grow">Кўчириш</span><span class="badge soft">82%</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-box"/></svg><span class="grow">Склад</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-order"/></svg><span class="grow">Буюртма</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">Мижозлар</div>
+          <a class="nav-item"><svg class="i"><use href="#i-users"/></svg><span class="grow">Фойдаланувчилар</span><span class="badge red">3</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-send"/></svg><span class="grow">Хабар юбориш</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-report"/></svg><span class="grow">Ҳисоботлар</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">Тизим</div>
+          <a class="nav-item"><svg class="i"><use href="#i-chart"/></svg><span class="grow">Статистика</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-log"/></svg><span class="grow">Журнал</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-gear"/></svg><span class="grow">Созламалар</span></a>
+          <a class="nav-item"><svg class="i"><use href="#i-wand"/></svg><span class="grow">Созлаш устаси</span></a>
+        </div>
+        <div class="nav-foot">
+          <div class="avatar">МФ</div>
+          <b>Намуна Фарм</b>
+          <small><span class="dot"></span>Бот ва сервер онлайн</small>
+        </div>
+      </nav>
+
+      <!-- Бош саҳифа -->
+      <main class="main">
+        <div class="head">
+          <div>
+            <div class="eyebrow">Сешанба, 17 ноябр</div>
+            <h1>Хайрли кун, Намуна Фарм</h1>
+          </div>
+          <div class="head-meta">
+            <span class="pill"><span class="dot"></span>3 филиал уланган</span>
+          </div>
+        </div>
+
+        <section class="row-a">
+          <!-- Янгилаш ҳолати -->
+          <div class="card sync">
+            <div class="sync-top">
+              <div class="ring" aria-label="Янгилаш тугади, 100%">
+                <svg width="66" height="66" viewBox="0 0 66 66">
+                  <circle class="track" cx="33" cy="33" r="28" stroke-width="6"/>
+                  <circle class="val" cx="33" cy="33" r="28" stroke-width="6" pathLength="100" stroke-dasharray="100 0"/>
+                </svg>
+                <div class="center"><svg class="i" style="width:24px;height:24px;stroke-width:2.2"><use href="#i-check"/></svg></div>
+              </div>
+              <div>
+                <div class="eyebrow">Excel база</div>
+                <div class="sync-time num" style="margin-top:6px">08:42</div>
+                <div class="sync-text">Маълумот янгиланди · <b>бугун 08:42</b></div>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="btn primary" type="button"><svg class="i"><use href="#i-refresh"/></svg>Янгилаш</button>
+              <button class="btn" type="button"><svg class="i"><use href="#i-tool"/></svg>Техник режим</button>
+            </div>
+          </div>
+
+          <!-- Кўрсаткичлар -->
+          <div class="stats">
+            <article class="card stat">
+              <div class="stat-top">
+                <span class="ico warn"><svg class="i"><use href="#i-hour"/></svg></span>
+                <span class="chip warn"><svg class="i"><use href="#i-alert"/></svg>Диққат</span>
+              </div>
+              <div class="stat-label">Срок яқин (90 кун)</div>
+              <div class="stat-num num"><b>128</b><span>та дори</span></div>
+            </article>
+            <article class="card stat">
+              <div class="stat-top">
+                <span class="ico"><svg class="i"><use href="#i-pause"/></svg></span>
+              </div>
+              <div class="stat-label">30+ кун турган</div>
+              <div class="stat-num num"><b>342</b><span>та дори</span></div>
+            </article>
+            <article class="card stat">
+              <div class="stat-top">
+                <span class="ico"><svg class="i"><use href="#i-users"/></svg></span>
+              </div>
+              <div class="stat-label">Фойдаланувчилар</div>
+              <div class="stat-num num"><b>57</b><span>киши</span></div>
+            </article>
+            <article class="card stat">
+              <div class="stat-top">
+                <span class="ico warn"><svg class="i"><use href="#i-user-check"/></svg></span>
+                <span class="chip warn">Кўриб чиқинг</span>
+              </div>
+              <div class="stat-label">Тасдиқ кутмоқда</div>
+              <div class="stat-num num"><b>3</b><span>ариза</span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="row-b">
+          <!-- Бугунги кўчириш -->
+          <div class="card move">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Бугунги кўчириш</h2>
+                <div class="card-sub">Филиаллар бўйича бажарилиш</div>
+              </div>
+            </div>
+            <div class="move-total">
+              <div class="mt-row"><span>Умумий</span><b class="num">82%</b></div>
+              <div class="bar"><i style="width:82%"></i></div>
+            </div>
+            <ul class="branches">
+              <li class="branch">
+                <div class="ring">
+                  <svg width="54" height="54" viewBox="0 0 54 54"><circle class="track" cx="27" cy="27" r="22" stroke-width="5"/><circle class="val" cx="27" cy="27" r="22" stroke-width="5" pathLength="100" stroke-dasharray="92 100"/></svg>
+                  <div class="center num">92%</div>
+                </div>
+                <div style="min-width:0">
+                  <div class="br-name">ДОРИХОНА ЧИНОЗ</div>
+                  <div class="br-meta"><span class="chip good"><svg class="i"><use href="#i-check"/></svg>0 кечикди</span></div>
+                </div>
+                <svg class="i chev"><use href="#i-chev"/></svg>
+              </li>
+              <li class="branch">
+                <div class="ring">
+                  <svg width="54" height="54" viewBox="0 0 54 54"><circle class="track" cx="27" cy="27" r="22" stroke-width="5"/><circle class="val" cx="27" cy="27" r="22" stroke-width="5" pathLength="100" stroke-dasharray="76 100"/></svg>
+                  <div class="center num">76%</div>
+                </div>
+                <div style="min-width:0">
+                  <div class="br-name">ДОРИХОНА УРГУТ</div>
+                  <div class="br-meta"><span class="chip warn"><svg class="i"><use href="#i-clock"/></svg>2 кечикди</span></div>
+                </div>
+                <svg class="i chev"><use href="#i-chev"/></svg>
+              </li>
+              <li class="branch">
+                <div class="ring">
+                  <svg width="54" height="54" viewBox="0 0 54 54"><circle class="track" cx="27" cy="27" r="22" stroke-width="5"/><circle class="val" cx="27" cy="27" r="22" stroke-width="5" pathLength="100" stroke-dasharray="64 100"/></svg>
+                  <div class="center num">64%</div>
+                </div>
+                <div style="min-width:0">
+                  <div class="br-name">ДОРИХОНА ЭРКИН</div>
+                  <div class="br-meta"><span class="chip warn"><svg class="i"><use href="#i-alert"/></svg>4 кечикди</span></div>
+                </div>
+                <svg class="i chev"><use href="#i-chev"/></svg>
+              </li>
+            </ul>
+            <div class="card-foot">
+              <button class="link" type="button">Кўчириш бўлимига ўтиш<svg class="i"><use href="#i-arrow"/></svg></button>
+            </div>
+          </div>
+
+          <!-- Срок · ABC таҳлил -->
+          <div class="card abc">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Срок · ABC таҳлил <span class="chip new">Янги</span></h2>
+                <div class="card-sub">Муддати яқин дорилар пул бўйича камайиш тартибида · A — жами пулнинг 80% и</div>
+              </div>
+            </div>
+            <div class="tabs" role="tablist" aria-label="ABC гуруҳлари">
+              <button class="tab" role="tab" aria-selected="true" type="button">
+                <span class="tab-letter">A</span>
+                <span class="tab-meta">20 та · 42,6 млн</span>
+                <span class="tab-share"><span class="bar"><i style="width:80%"></i></span><small>80%</small></span>
+              </button>
+              <button class="tab" role="tab" aria-selected="false" type="button">
+                <span class="tab-letter">B</span>
+                <span class="tab-meta">31 та · 8,0 млн</span>
+                <span class="tab-share"><span class="bar"><i style="width:15%"></i></span><small>15%</small></span>
+              </button>
+              <button class="tab" role="tab" aria-selected="false" type="button">
+                <span class="tab-letter">C</span>
+                <span class="tab-meta">77 та · 2,7 млн</span>
+                <span class="tab-share"><span class="bar"><i style="width:5%"></i></span><small>5%</small></span>
+              </button>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr><th class="c-n">#</th><th>Дори</th><th class="c-date">Муддат</th><th class="c-qty">Қолдиқ</th><th class="c-sum">Сумма</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="c-n">1</td><td class="c-name">Аугментин 625мг №14</td>
+                    <td class="c-date"><span class="d">12.01.2027</span><span class="chip neutral">56 кун</span></td>
+                    <td class="c-qty">46</td>
+                    <td class="c-sum"><span class="sum"><span class="bar"><i style="width:100%"></i></span><b>8 740 000</b><em>сўм</em></span></td>
+                  </tr>
+                  <tr>
+                    <td class="c-n">2</td><td class="c-name">Эссенциале форте №30</td>
+                    <td class="c-date"><span class="d">28.12.2026</span><span class="chip neutral">41 кун</span></td>
+                    <td class="c-qty">38</td>
+                    <td class="c-sum"><span class="sum"><span class="bar"><i style="width:71.7%"></i></span><b>6 270 000</b><em>сўм</em></span></td>
+                  </tr>
+                  <tr>
+                    <td class="c-n">3</td><td class="c-name">Нурофен 200мг №24</td>
+                    <td class="c-date"><span class="d">03.02.2027</span><span class="chip neutral">78 кун</span></td>
+                    <td class="c-qty">120</td>
+                    <td class="c-sum"><span class="sum"><span class="bar"><i style="width:46.7%"></i></span><b>4 080 000</b><em>сўм</em></span></td>
+                  </tr>
+                  <tr>
+                    <td class="c-n">4</td><td class="c-name">Линекс №16</td>
+                    <td class="c-date"><span class="d">19.01.2027</span><span class="chip neutral">63 кун</span></td>
+                    <td class="c-qty">54</td>
+                    <td class="c-sum"><span class="sum"><span class="bar"><i style="width:40.2%"></i></span><b>3 510 000</b><em>сўм</em></span></td>
+                  </tr>
+                  <tr>
+                    <td class="c-n">5</td><td class="c-name">Цитрамон П №10</td>
+                    <td class="c-date"><span class="d">07.12.2026</span><span class="chip warn">20 кун</span></td>
+                    <td class="c-qty">300</td>
+                    <td class="c-sum"><span class="sum"><span class="bar"><i style="width:18.9%"></i></span><b>1 650 000</b><em>сўм</em></span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="abc-foot">
+              <small>A гуруҳи · 20 тадан 5 таси кўрсатилган</small>
+              <button class="btn excel" type="button"><svg class="i"><use href="#i-download"/></svg>Яна 15 та · Excel'да юклаб олиш</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <dl class="note">
+    <dt>Вариант 3 · Тун</dt>
+    <dd><b>Ғоя:</b> тўқ кўк қатламлардан қурилган буйруқ панели; лайм ранг фақат асосий ҳаракат ва бажарилиш ҳалқаларида, шафтоли ранг фақат огоҳлантиришда.</dd>
+    <dt>Кимга мос</dt>
+    <dd>Кун бўйи панелни очиқ ушлайдиган, кечқурун ва эрта тонгда ишлайдиган менежер ва дорихона эгаси учун.</dd>
+    <dt>Кучли томони</dt>
+    <dd>Йирик рақамлар ва ҳалқалар ҳолатни бир қарашда кўрсатади, кўз чарчамайди; ёруғ мавзуда ҳам худди шу тузилма тўқ кўк матн билан сақланади.</dd>
+  </dl>
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('theme-toggle');
+    var label = document.getElementById('theme-label');
+    var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+    function isLight() {
+      var t = root.getAttribute('data-theme');
+      if (t) return t === 'light';
+      return !!(mq && mq.matches);
+    }
+    function paint() {
+      var light = isLight();
+      root.classList.toggle('is-light', light);
+      label.textContent = light ? 'Кун' : 'Тун';
+    }
+    btn.addEventListener('click', function () {
+      var next = isLight() ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('ts-theme', next); } catch (e) {}
+      paint();
+    });
+    if (mq && mq.addEventListener) mq.addEventListener('change', paint);
+    paint();
+
+    // ABC таблари: фақат кўриниш ҳолати
+    var tabs = document.querySelectorAll('.tab');
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        tabs.forEach(function (x) { x.setAttribute('aria-selected', x === t ? 'true' : 'false'); });
+      });
+    });
+  })();
+</script>
+</body>
+</html>

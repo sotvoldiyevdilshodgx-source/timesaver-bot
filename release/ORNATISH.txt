@@ -1,0 +1,28 @@
+TimeSaver 1.0.0 — o'rnatish yo'riqnomasi
+=========================================
+
+TALABLAR
+- Windows 10 yoki 11 (64-bit)
+- Microsoft Excel (makrosli baza_yangi.xlsm ni yangilash uchun)
+- Hisob dasturining SQL Server bazasiga tarmoq orqali ulanish
+- Internet (Telegram uchun)
+Python o'rnatish shart emas: hammasi TimeSaver-Setup ichida.
+
+O'RNATISH
+1. TimeSaver-Setup-1.0.0.exe ni ishga tushiring (administrator huquqi so'raladi).
+   Windows «Неизвестный издатель» deb ogohlantirsa: «Подробнее» → «Выполнить в любом случае».
+2. «Ярлык на рабочем столе» va «Запускать вместе с Windows» belgilangan qolsin → «Установить».
+3. Oxirida «Запустить TimeSaver» belgilangan holda «Завершить» — brauzerda Sozlash ustasi ochiladi.
+
+SOZLASH USTASI (6 qadam)
+1. Dorixona nomi va sklad nomi.
+2. Telegram bot: @BotFather → /newbot → tokenni qo'ying → botga /start yozing → «Admin qilish».
+3. SQL baza: server, baza nomi, login va parol (bo'sh login — Windows orqali). C:\ProgramData\BazaReport\db.ini ga yoziladi.
+4. Excel: baza_yangi.xlsm faylini tashlang (C:\ProgramData\TimeSaver\baza\ ga saqlanadi) yoki kompyuterdagi yo'lini kiriting.
+5. Sinov: «Обновить» — Excel yashirin ochilib, SQL dan yangilanadi.
+6. «Ishni boshlash».
+
+KEYIN
+- Panel: Pusk menyusi yoki ish stolidagi «TimeSaver» yorlig'i (dastur ishlab turgan bo'lsa, panel ochiladi).
+- Soat yonidagi TimeSaver ikonkasi: yashil nuqta — ishlayapti, sariq — yangilanmoqda, qizil — Telegramga ulanmagan.
+- Ma'lumotlar: C:\ProgramData\TimeSaver (config.ini, bot.db, bot.log, baza\). O'chirib qayta o'rnatganda ular saqlanib qoladi.
